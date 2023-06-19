@@ -94,7 +94,8 @@ void ingresarMenu() {
   for(int i = 0; i < cantidadPlatos; i++) {
     do {
       existePlato = false;
-      cout << "Nombre del plato " << i + 1 << ": "; fflush(stdin); gets(menuEscritura.platos[i].nombre);
+      cout << "Nombre del plato " << i + 1 << ": "; fflush(stdin); gets(menuEscritura.platos[i].nombre); 
+      mayusculas(menuEscritura.platos[i].nombre);
        
       // Revisa que el nombre no este vacia
       if(menuEscritura.platos[i].nombre[0] == '\0') cout << ROJO << "El nombre del plato no puede estar vacio." << DEFECTO << endl;
