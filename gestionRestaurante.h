@@ -2,13 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <conio.h>
-
+#include <string.h>
 using namespace std;
 
 void gestionRestaurante();
 void ingresarMenu();
 void registrarPlato();
-
 
 void gestionRestaurante() {
   int entrada, opcion = 1;
@@ -24,6 +23,7 @@ void gestionRestaurante() {
     cout << (opcion == 4 ? AZUL : "") << (opcion == 4 ? "> " : "") << (opcion == 4 ? DEFECTO : GRIS) << "Facturacion" << endl;
     cout << (opcion == 5 ? AZUL : "") << (opcion == 5 ? "> " : "") << (opcion == 5 ? DEFECTO : GRIS) << "Consulta" << endl;
     cout << (opcion == 6 ? AZUL : "") << (opcion == 6 ? "> " : "") << (opcion == 6 ? DEFECTO : GRIS) << "Salir" << endl;
+    cout << DEFECTO;
 
     /**
      * Mediante el codigo ASCII de las flechas del teclado, podemos realizar
@@ -61,8 +61,9 @@ void gestionRestaurante() {
 
 void ingresarMenu() {
   static int numero = 0;
-  Menu menuLectura;
+  Menu menuLectura, menuEscritura;
   int cantidadPlatos;
+  bool existePlato = false;
   
   // Lee el archivo de menus para conocer los numeros de los menus.
   ifstream archivoLectura("menus.txt", ios::in | ios::binary);
@@ -80,8 +81,8 @@ void ingresarMenu() {
 
   // Lee los datos ingresados del usuario
   system("cls");
-  cout << "INGRESAR MENU " << AZUL <<  numero + 1 << DEFECTO << endl;
-  cout << "Complete los campos " << endl << "Recuerde que la cantidad maxima de platos es " << CANT_MAX_PLATOS << endl << endl;
+  cout << "INGRESAR MENU " << numero + 1 << endl;
+  cout << "Complete los campos." << endl << "Recuerde que la cantidad maxima de platos es " << CANT_MAX_PLATOS << "." <<  endl << endl;
   do {
     cout << "Digite la cantidad de platos: "; cin >> cantidadPlatos;
     if(cantidadPlatos > CANT_MAX_PLATOS || cantidadPlatos <= 0) {
@@ -89,8 +90,24 @@ void ingresarMenu() {
     }
   } while(cantidadPlatos > CANT_MAX_PLATOS || cantidadPlatos <= 0);
 
+  // Ingresa el nombre de los platos 
+  for(int i = 0; i < cantidadPlatos; i++) {
+    do {
+      existePlato = false;
+      cout << "Nombre del plato " << i + 1 << ": "; fflush(stdin); gets(menuEscritura.platos[i].nombre);
+       
+      // Revisa que el nombre no este vacia
+      if(menuEscritura.platos[i].nombre[0] == '\0') cout << ROJO << "El nombre del plato no puede estar vacio." << DEFECTO << endl;
+
+      // Revisa que el nombre ingresado no haya sido ingresado anteriormente en el menu.
+      for(int k = 0; k < i; k++) {
+        if(strcmp(menuEscritura.platos[k].nombre , menuEscritura.platos[i].nombre) == 0) existePlato = true;
+      }
+      if(existePlato) cout << ROJO << "El nombre de un plato no puede estar repetido en un mismo menu." << DEFECTO << endl;
+    } while(menuEscritura.platos[i].nombre[0] == '\0' || existePlato);
+  }
+
   // Escribe en el archivo
-  Menu menuEscritura;
   ofstream archivoEscritura("menus.txt", ios::app | ios::binary);
   if(archivoEscritura.fail()) {
     cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;

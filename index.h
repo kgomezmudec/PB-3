@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string>
 
 // Codigo de colores
 #define DEFECTO "\033[0m"     
