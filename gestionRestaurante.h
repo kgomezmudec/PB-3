@@ -8,6 +8,8 @@ using namespace std;
 void gestionRestaurante();
 void ingresarMenu();
 void registrarPlato();
+void consultas();
+void consultaListarCarta();
 
 void gestionRestaurante() {
   int entrada, opcion = 1;
@@ -52,7 +54,7 @@ void gestionRestaurante() {
         case 2: registrarPlato(); break;
         case 3: break;
         case 4: break;
-        case 5: break;
+        case 5: consultas(); break;
         case 6: break;
       }
     }
@@ -218,4 +220,76 @@ void registrarPlato() {
 
   cout << endl << VERDE << "Los ingredientes de los platos fueron registrados." << DEFECTO << endl;
   system("pause");
+}
+
+void consultas() {
+  int entrada, opcion = 1;
+  do {
+    system("cls");
+    cout << DEFECTO << "CONSULTAS (GESTION RESTAURANTE)" << endl;
+    cout << DEFECTO << "Utilice las flechas del teclado para desplazarse." << endl;
+    cout << DEFECTO << "Utilice el enter para escoger su opcion." << endl << endl;
+    cout << DEFECTO << "Seleccione una opcion: " << endl << endl;
+    cout << (opcion == 1 ? AZUL : "") << (opcion == 1 ? "> " : "") << (opcion == 1 ? DEFECTO : GRIS) << "Listar carta" << endl;
+    cout << (opcion == 2 ? AZUL : "") << (opcion == 2 ? "> " : "") << (opcion == 2 ? DEFECTO : GRIS) << "Menu" << endl;
+    cout << (opcion == 3 ? AZUL : "") << (opcion == 3 ? "> " : "") << (opcion == 3 ? DEFECTO : GRIS) << "Menu por estudiante" << endl; 
+    cout << (opcion == 4 ? AZUL : "") << (opcion == 4 ? "> " : "") << (opcion == 4 ? DEFECTO : GRIS) << "Salir" << endl;
+    cout << DEFECTO;
+
+    /**
+     * Mediante el codigo ASCII de las flechas del teclado, podemos realizar
+     * la seleccion de opciones disponibles en el menu. Teniendo en cuenta:
+     * Codigo ASCII para las flechas: 224
+     * Codigo ASCII para la flecha hacia arriba: 72.
+     * Codigo ASCII para la flecha hacia la derecha: 77.
+     * Codigo ASCII para la flecha hacia abajo: 80.
+     * Codigo ASCII para la flecha hacia la izquierda: 75.
+     * Codigo ASCII para el enter: 13.
+     */
+    entrada = getch();
+    if(entrada == 224) {
+      entrada = getch();
+      if(entrada == 80 || entrada == 77) opcion = (opcion == 4) ? 1 : opcion + 1;
+      if(entrada == 72 || entrada == 75) opcion = (opcion == 1) ? 4 : opcion - 1;
+    }
+
+    /**
+     * Una vez confirmada la opción del usuario y teniendo en cuenta el codigo ASCII 
+     * del enter (13) se gestiona la selección.
+     */ 
+    else if(entrada == 13) {
+      switch(opcion) {
+        case 1: consultaListarCarta(); break;
+        case 2: break;
+        case 3: break;
+        case 4: break;
+      }
+    }
+  } while(opcion != 4 || entrada != 13);
+}
+
+void consultaListarCarta() {
+  Menu menu;
+  system("cls");
+  cout << "LISTAR CARTA" << endl;
+
+  ifstream archivo("menus.txt", ios::in | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+
+  archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  while(!archivo.eof()) {
+    cout << endl << "Menu No. " << menu.numero << endl;
+    for(int i = 0; i < menu.cantidadPlatos; i++) {
+      cout << i + 1 << ". " << menu.platos[i].nombre << endl;
+    }
+    cout << "Coste: $" << menu.coste << endl;
+
+    archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  }
+  archivo.close();
+  cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
 }
