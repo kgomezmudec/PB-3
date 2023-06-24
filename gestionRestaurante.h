@@ -65,7 +65,7 @@ void ingresarMenu() {
   int cantidadPlatos;
   bool existePlato = false;
   
-  // Lee el archivo de menus para conocer los numeros de los menus.
+  // Lee el archivo de menus.txt para conocer los numeros de los menus anteriores.
   ifstream archivoLectura("menus.txt", ios::in | ios::binary);
   if(archivoLectura.fail()) {
     cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
@@ -107,6 +107,12 @@ void ingresarMenu() {
       if(existePlato) cout << ROJO << "El nombre de un plato no puede estar repetido en un mismo menu." << DEFECTO << endl;
     } while(menuEscritura.platos[i].nombre[0] == '\0' || existePlato);
   }
+
+  //Ingresa el coste del menu
+  do {
+    cout << "Coste total: " ; cin >> menuEscritura.coste;
+    if(menuEscritura.coste < COSTO_MIN_MENU) cout << ROJO << "El coste minimo es $" << COSTO_MIN_MENU << DEFECTO << endl;
+  } while(menuEscritura.coste < COSTO_MIN_MENU);
 
   // Escribe en el archivo
   ofstream archivoEscritura("menus.txt", ios::app | ios::binary);

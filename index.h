@@ -10,6 +10,9 @@
 // LIMITE DE PLATOS POR MENU
 #define CANT_MAX_PLATOS 20
 
+// COSTO MIN POR MENU
+#define COSTO_MIN_MENU 5000
+
 struct Plato {
   char nombre[50];
   char ingredientes[500];
@@ -18,6 +21,7 @@ struct Plato {
 struct Menu {
   int numero;
   int cantidadPlatos;
+  float coste;
   Plato platos[CANT_MAX_PLATOS]; 
 };
 
