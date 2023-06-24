@@ -175,7 +175,7 @@ void registrarPlato() {
       for(int k = 0; k < menus[i].cantidadPlatos; k++) {
         // Revisa que no sea un campo vacio
         do {
-          cout << "Ingredientes del plato " << k + 1 << ": "; fflush(stdin); gets(menus[i].platos[k].ingredientes); 
+          cout << "Ingredientes del plato " << menus[i].platos[k].nombre << ": "; fflush(stdin); gets(menus[i].platos[k].ingredientes); 
           mayusculas(menus[i].platos[k].ingredientes);
           if(menus[i].platos[k].ingredientes[0] == '\0') cout << ROJO << "El nombre del plato no puede estar vacio." << DEFECTO << endl;
         } while(menus[i].platos[k].ingredientes[0] == '\0');
