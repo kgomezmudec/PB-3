@@ -10,6 +10,7 @@ void ingresarMenu();
 void registrarPlato();
 void consultas();
 void consultaListarCarta();
+void consultaMenu();
 
 void gestionRestaurante() {
   int entrada, opcion = 1;
@@ -83,8 +84,9 @@ void ingresarMenu() {
 
   // Lee los datos ingresados del usuario
   system("cls");
-  cout << "INGRESAR MENU " << numero + 1 << endl;
+  cout << "INGRESAR MENU" << endl;
   cout << "Complete los campos." << endl << "Recuerde que la cantidad maxima de platos es " << CANT_MAX_PLATOS << "." <<  endl << endl;
+  cout << "Menu No. " << numero + 1 << endl;
   do {
     cout << "Digite la cantidad de platos: "; cin >> cantidadPlatos;
     if(cantidadPlatos > CANT_MAX_PLATOS || cantidadPlatos <= 0) {
@@ -260,7 +262,7 @@ void consultas() {
     else if(entrada == 13) {
       switch(opcion) {
         case 1: consultaListarCarta(); break;
-        case 2: break;
+        case 2: consultaMenu(); break;
         case 3: break;
         case 4: break;
       }
@@ -282,14 +284,59 @@ void consultaListarCarta() {
 
   archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   while(!archivo.eof()) {
-    cout << endl << "Menu No. " << menu.numero << endl;
-    for(int i = 0; i < menu.cantidadPlatos; i++) {
-      cout << i + 1 << ". " << menu.platos[i].nombre << endl;
+    if(menu.registroPlatos) {
+      cout << endl << "Menu No. " << menu.numero << endl;
+      for(int i = 0; i < menu.cantidadPlatos; i++) {
+        cout << i + 1 << ". " << menu.platos[i].nombre << endl;
+      }
+      cout << "Coste: $" << menu.coste << endl;
     }
-    cout << "Coste: $" << menu.coste << endl;
-
     archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   }
   archivo.close();
+  cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
+}
+
+void consultaMenu() {
+  Menu menu;
+  int n;
+  bool existeMenu = false;
+  system("cls");
+  cout << "MENU" << endl << "Numero del menu: "; cin >> n;
+
+  ifstream archivo("menus.txt", ios::in | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  
+  archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  while(!archivo.eof()) {
+
+    if(menu.numero == n && menu.registroPlatos) {
+      cout << endl << "Menu No. " << menu.numero << endl;
+      for(int i = 0; i < menu.cantidadPlatos; i++) {
+        cout << endl << menu.platos[i].nombre << endl;
+        cout << "Ingredientes: " << menu.platos[i].ingredientes << endl;
+      }
+      existeMenu = true;
+      break;
+    }
+    if(menu.numero == n && !menu.registroPlatos) {
+      cout << ROJO << "Los platos de este menu no han sido registrados." << DEFECTO << endl;
+      system("pause");
+      return;
+    }
+    archivo.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  }
+  archivo.close();
+
+  if(!existeMenu) {
+    cout << ROJO << "El numero no coincide con ningun menu." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
   cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
 }
