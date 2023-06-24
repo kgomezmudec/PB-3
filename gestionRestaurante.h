@@ -86,7 +86,7 @@ void ingresarMenu() {
   do {
     cout << "Digite la cantidad de platos: "; cin >> cantidadPlatos;
     if(cantidadPlatos > CANT_MAX_PLATOS || cantidadPlatos <= 0) {
-      cout << ROJO << "La cantidad de platos definida sobrepasa el limite" << DEFECTO << endl;
+      cout << ROJO << "Fuera de rango" << DEFECTO << endl;
     }
   } while(cantidadPlatos > CANT_MAX_PLATOS || cantidadPlatos <= 0);
 
@@ -131,5 +131,91 @@ void ingresarMenu() {
 }
 
 void registrarPlato() {
+  Menu i;
+  int numeroMenu, contMenus = 0;
+  bool existeMenu = false;
+  system("cls");
+  cout << "REGISTRO DE PLATOS" << endl;
+  cout << "Complete los campos." << endl << endl;
+  cout << "Numero del menu: "; cin >> numeroMenu;
   
+  ifstream archivo("menus.txt", ios::in | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+
+  // Calcula la cantidad de menus. 
+  archivo.read(reinterpret_cast<char *>(&i), sizeof(Menu));
+  while(!archivo.eof()) {
+    contMenus++;
+    archivo.read(reinterpret_cast<char *>(&i), sizeof(Menu));
+  }
+  archivo.close();
+
+  ifstream archivoLectura("menus.txt", ios::in | ios::binary);
+  if(archivoLectura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+
+  // Llena el arreglo de menus
+  Menu menus[contMenus];
+  for(int i = 0; i < contMenus; i++){
+    archivoLectura.read(reinterpret_cast<char *>(&menus[i]), sizeof(Menu));
+  }
+  archivoLectura.close();
+
+  // Busca el menu
+  for(int i = 0; i < contMenus; i++){
+    if(menus[i].numero == numeroMenu && !menus[i].registroPlatos) {
+      // Registra los ingredientes de los platos
+      for(int k = 0; k < menus[i].cantidadPlatos; k++) {
+        // Revisa que no sea un campo vacio
+        do {
+          cout << "Ingredientes del plato " << k + 1 << ": "; fflush(stdin); gets(menus[i].platos[k].ingredientes); 
+          mayusculas(menus[i].platos[k].ingredientes);
+          if(menus[i].platos[k].ingredientes[0] == '\0') cout << ROJO << "El nombre del plato no puede estar vacio." << DEFECTO << endl;
+        } while(menus[i].platos[k].ingredientes[0] == '\0');
+      }
+      existeMenu = true;
+      menus[i].registroPlatos = true;
+      break;
+    }
+
+    if(menus[i].numero == numeroMenu && menus[i].registroPlatos) {
+      cout << ROJO << "Los platos de este menu ya han sido registrados" << DEFECTO << endl;
+      system("pause");
+      return; 
+    }
+
+  }
+
+  // Verifica si el menu no fue encontrado
+  if(!existeMenu) {
+    cout << ROJO << "El numero ingresado no esta registrado." << DEFECTO << endl; 
+    system("pause");
+    return;
+  }
+
+  /**
+   * En este punto ya se encontro el menu y los ingredientes de los platos fueron registrados.
+   * Se actualiza el archivo de menus.
+   */
+  ofstream archivoEscritura("menus.txt", ios::out | ios::binary);
+   if(archivoEscritura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+
+  for(int i = 0; i < contMenus; i++) {
+    archivoEscritura.write(reinterpret_cast<char *>(&menus[i]), sizeof(Menu));
+  }
+  archivoEscritura.close();
+
+  cout << endl << VERDE << "Los ingredientes de los platos fueron registrados." << DEFECTO << endl;
+  system("pause");
 }

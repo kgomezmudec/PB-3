@@ -23,6 +23,7 @@ struct Menu {
   int cantidadPlatos;
   float coste;
   Plato platos[CANT_MAX_PLATOS]; 
+  bool registroPlatos = false;
 };
 
 void mayusculas(char cadena[]) {
