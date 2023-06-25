@@ -26,8 +26,25 @@ struct Menu {
   bool registroPlatos = false;
 };
 
-struct Estudiante {
-  int dias = 0;
+struct Fecha {
+  int dia;
+  int mes;
+  int anio;
+};
+
+struct Ingrediente {
+  char nombre[50];
+};
+
+struct Matricula {
+  long id;
+  char nombre[50];
+  Fecha nacimiento;
+  Fecha ingreso;
+  Fecha retiro;
+  bool estado;
+  int numeroAlergias;
+  Ingrediente alergias[100];
 };
 
 void mayusculas(char cadena[]) {

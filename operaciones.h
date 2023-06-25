@@ -13,6 +13,9 @@ void consultaListarCarta();
 void consultaMenu();
 
 void gestionAcademica();
+void matricula();
+
+bool existeMatricula(long id);
 
 // GESTION RESTAURANTE
 
@@ -110,7 +113,7 @@ void ingresarMenu() {
 
       // Revisa que el nombre ingresado no haya sido ingresado anteriormente en el menu.
       for(int k = 0; k < i; k++) {
-        if(strcmp(menuEscritura.platos[k].nombre , menuEscritura.platos[i].nombre) == 0) existePlato = true;
+        if(strcmp(menuEscritura.platos[k].nombre, menuEscritura.platos[i].nombre) == 0) existePlato = true;
       }
       if(existePlato) cout << ROJO << "El nombre de un plato no puede estar repetido en un mismo menu." << DEFECTO << endl;
     } while(menuEscritura.platos[i].nombre[0] == '\0' || existePlato);
@@ -193,12 +196,12 @@ void registrarPlato() {
       break;
     }
 
+    // Evita que se se reescriban los ingredientes, preeve desencadenar una alergia en dado caso a un niño.
     if(menus[i].numero == numeroMenu && menus[i].registroPlatos) {
       cout << ROJO << "Los platos de este menu ya han sido registrados" << DEFECTO << endl;
       system("pause");
       return; 
     }
-
   }
 
   // Verifica si el menu no fue encontrado
@@ -387,7 +390,7 @@ void gestionAcademica() {
      */ 
     else if(entrada == 13) {
       switch(opcion) {
-        case 1: break;
+        case 1: matricula(); break;
         case 2: break;
         case 3: break;
         case 4: break;
@@ -397,4 +400,136 @@ void gestionAcademica() {
       }
     }
   } while(opcion != 7 || entrada != 13);
+}
+
+void matricula() {
+  Matricula matricula;
+  
+  ifstream archivoLectura("matriculas.txt", ios::in | ios::binary);
+  if(archivoLectura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  archivoLectura.close();
+
+  // Lee los datos ingresados del usuario
+  system("cls");
+  cout << "MATRICULAR ESTUDIANTE" << endl;
+  cout << "Complete los campos." << endl << endl;
+
+  do {
+    cout << "Numero de la matricula: "; cin >> matricula.id;
+    if(matricula.id <= 0) cout << ROJO << "El numero debe ser mayor que 0" << DEFECTO << endl;
+    if(existeMatricula(matricula.id)) cout << ROJO << "El numero ingresado ya le pertenece a otra matricula" << DEFECTO << endl;
+  } while(matricula.id <= 0 or existeMatricula(matricula.id));
+
+  // Ingresa el nombre del niño
+  do {
+    cout << "Nombre del estudiante: "; fflush(stdin); gets(matricula.nombre); mayusculas(matricula.nombre);
+    // Revisa que el nombre no este vacio.
+    if(matricula.nombre[0] == '\0') cout << ROJO << "El nombre del estudiante no puede estar vacio." << DEFECTO << endl;
+  } while(matricula.nombre[0] == '\0');
+  
+  // Ingresa la fecha de naciemiento: Rango de edad 2-5 años
+  cout << endl << "Fecha de nacimiento" << endl;
+  short diasMaximosPorMesA[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  
+  do {
+		cout << "Año: "; cin >> matricula.nacimiento.anio;
+		if(matricula.nacimiento.anio < 2018|| matricula.nacimiento.anio > 2021) cout << ROJO << "El estudiante no tiene la edad para entrar en la guarderia." << DEFECTO << endl;
+	} while(matricula.nacimiento.anio < 2018|| matricula.nacimiento.anio > 2021);
+
+	// Verifica si es año biciesto, cambia el dia maximo para febrero.
+	if((matricula.nacimiento.anio % 4 == 0 && matricula.nacimiento.anio % 100 != 0) || (matricula.nacimiento.anio % 400 == 0)) diasMaximosPorMesA[1] = 29;
+
+	do {
+		cout << "Mes: "; cin >> matricula.nacimiento.mes;
+		if(matricula.nacimiento.mes < 1 || matricula.nacimiento.mes > 12) cout << ROJO << "El mes ingresado debe estar comprendido entre 1 y 12." << DEFECTO << endl;
+	} while(matricula.nacimiento.mes < 1 || matricula.nacimiento.mes > 12);
+
+	do {
+		cout << "Dia: "; cin >> matricula.nacimiento.dia;
+		if(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]) cout << ROJO << "El dia ingresado debe estar comprendido entre 1 y " << diasMaximosPorMesA[matricula.nacimiento.mes - 1] << "." << DEFECTO << endl;
+	} while(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]);
+
+  cout << endl << "Fecha de ingreso" << endl;
+	short diasMaximosPorMesB[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+	do {
+		cout << "Año: "; cin >> matricula.ingreso.anio;
+		if(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 2) cout << ROJO << "El estudiante esta ingresando con " << matricula.ingreso.anio - matricula.nacimiento.anio << " años." << DEFECTO << endl;
+	} while(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 2);
+
+	// Verifica si es año biciesto, cambia el dia maximo para febrero.
+	if((matricula.ingreso.anio % 4 == 0 && matricula.ingreso.anio % 100 != 0) || (matricula.ingreso.anio % 400 == 0)) diasMaximosPorMesB[1] = 29;
+
+	do {
+		cout << "Mes: "; cin >> matricula.ingreso.mes;
+		if(matricula.ingreso.mes < 1 || matricula.ingreso.mes > 12) cout << ROJO << "El mes ingresado debe estar comprendido entre 1 y 12." << DEFECTO << endl;
+	} while(matricula.ingreso.mes < 1 || matricula.ingreso.mes > 12);
+
+	do {
+		cout << "Dia: "; cin >> matricula.ingreso.dia;
+		if(matricula.ingreso.dia < 1 || matricula.ingreso.dia > diasMaximosPorMesB[matricula.ingreso.mes - 1]) cout << ROJO << "El dia ingresado debe estar comprendido entre 1 y " << diasMaximosPorMesB[matricula.ingreso.mes - 1] << "." << DEFECTO << endl;
+	} while(matricula.ingreso.dia < 1 || matricula.ingreso.dia > diasMaximosPorMesB[matricula.ingreso.mes - 1]);
+
+  // Registro de alergias
+  cout << endl;
+  do {
+    cout << "A cuantos ingredientes es alergico el niño?: "; cin >> matricula.numeroAlergias;
+    if(matricula.numeroAlergias > 100 || matricula.numeroAlergias < 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
+  } while(matricula.numeroAlergias > 100 || matricula.numeroAlergias < 0);
+  
+  bool alergiaRepetida;
+  for(int i = 0; i < matricula.numeroAlergias; i++) {
+    do {
+      alergiaRepetida = false;
+      cout << "Alergia No. " << i + 1 << ": "; fflush(stdin); gets(matricula.alergias[i].nombre); mayusculas(matricula.alergias[i].nombre);
+      // Revisa que el campo no se quede vacio.
+      if(matricula.alergias[i].nombre[0] == '\0') cout << ROJO << "El campo no puede estar vacio." << DEFECTO << endl;
+
+      // Revisa que no se repita una alergia.
+      for(int k = 0; k < i; k++) {
+        if(strcmp(matricula.alergias[i].nombre, matricula.alergias[k].nombre) == 0) {
+          alergiaRepetida = true;
+          break;
+        }
+      }
+      if(alergiaRepetida) cout << ROJO << "Ya esta alergia se ingreso." << DEFECTO << endl;
+    } while(matricula.alergias[i].nombre[0] == '\0' || alergiaRepetida); 
+  }
+  matricula.estado = true;
+
+  // Escribe en el archivo
+  ofstream archivoEscritura("matriculas.txt", ios::app | ios::binary);
+  if(archivoEscritura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  archivoEscritura.write(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+  archivoEscritura.close();
+  cout << endl << VERDE << "Matricula ingresado exitosamente..." << DEFECTO << endl;
+  system("pause");
+}
+
+bool existeMatricula(long id) {
+	Matricula matricula;
+	ifstream archivo("matriculas.txt", ios::in | ios::binary);
+	if(archivo.fail()) {
+		cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+	archivo.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+	while(!archivo.eof()) {
+		if(id ==  matricula.id) {
+      archivo.close();
+      return true;
+    }	
+		archivo.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));	
+	}	
+	archivo.close();
+	return false;
 }

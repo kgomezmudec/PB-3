@@ -15,6 +15,18 @@ int main() {
   } 
   archivoMenusLectura.close();
 
+  ifstream archivoMatriculasLectura("matriculas.txt", ios::in | ios::binary);
+  if(archivoMatriculasLectura.fail()) {
+    ofstream archivoMatriculas("matriculas.txt", ios::out | ios::binary);
+    if(archivoMatriculas.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    archivoMatriculas.close();
+  } 
+  archivoMatriculasLectura.close();
+
   // MENU PRINCIPAL
   int entrada, opcion = 1;
   do {
