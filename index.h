@@ -26,6 +26,10 @@ struct Menu {
   bool registroPlatos = false;
 };
 
+struct Estudiante {
+  int dias = 0;
+};
+
 void mayusculas(char cadena[]) {
 	for(int i = 0; cadena[i] != '\0'; i++) cadena[i] = toupper(cadena[i]);
 }

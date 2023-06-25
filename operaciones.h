@@ -12,6 +12,10 @@ void consultas();
 void consultaListarCarta();
 void consultaMenu();
 
+void gestionAcademica();
+
+// GESTION RESTAURANTE
+
 void gestionRestaurante() {
   int entrada, opcion = 1;
   do {
@@ -339,4 +343,58 @@ void consultaMenu() {
   }
 
   cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
+}
+
+// GESTION ACADEMICA
+
+void gestionAcademica() {
+  int entrada, opcion = 1;
+  do {
+    system("cls");
+    cout << DEFECTO << "GESTION ACADEMICA" << endl;
+    cout << DEFECTO << "Utilice las flechas del teclado para desplazarse." << endl;
+    cout << DEFECTO << "Utilice el enter para escoger su opcion." << endl << endl;
+    cout << DEFECTO << "Seleccione una opcion: " << endl << endl;
+    cout << (opcion == 1 ? AZUL : "") << (opcion == 1 ? "> " : "") << (opcion == 1 ? DEFECTO : GRIS) << "Matricula" << endl;
+    cout << (opcion == 2 ? AZUL : "") << (opcion == 2 ? "> " : "") << (opcion == 2 ? DEFECTO : GRIS) << "Dar de baja matricula" << endl;
+    cout << (opcion == 3 ? AZUL : "") << (opcion == 3 ? "> " : "") << (opcion == 3 ? DEFECTO : GRIS) << "Registro de acudientes" << endl; 
+    cout << (opcion == 4 ? AZUL : "") << (opcion == 4 ? "> " : "") << (opcion == 4 ? DEFECTO : GRIS) << "Calculo pago mensualidad" << endl;
+    cout << (opcion == 5 ? AZUL : "") << (opcion == 5 ? "> " : "") << (opcion == 5 ? DEFECTO : GRIS) << "Registro de pago mensualidad" << endl;
+    cout << (opcion == 6 ? AZUL : "") << (opcion == 6 ? "> " : "") << (opcion == 6 ? DEFECTO : GRIS) << "Consultas" << endl;
+    cout << (opcion == 7 ? AZUL : "") << (opcion == 7 ? "> " : "") << (opcion == 7 ? DEFECTO : GRIS) << "Salir" << endl;
+    cout << DEFECTO;
+
+    /**
+     * Mediante el codigo ASCII de las flechas del teclado, podemos realizar
+     * la seleccion de opciones disponibles en el menu. Teniendo en cuenta:
+     * Codigo ASCII para las flechas: 224
+     * Codigo ASCII para la flecha hacia arriba: 72.
+     * Codigo ASCII para la flecha hacia la derecha: 77.
+     * Codigo ASCII para la flecha hacia abajo: 80.
+     * Codigo ASCII para la flecha hacia la izquierda: 75.
+     * Codigo ASCII para el enter: 13.
+     */
+    entrada = getch();
+    if(entrada == 224) {
+      entrada = getch();
+      if(entrada == 80 || entrada == 77) opcion = (opcion == 7) ? 1 : opcion + 1;
+      if(entrada == 72 || entrada == 75) opcion = (opcion == 1) ? 7 : opcion - 1;
+    }
+
+    /**
+     * Una vez confirmada la opción del usuario y teniendo en cuenta el codigo ASCII 
+     * del enter (13) se gestiona la selección.
+     */ 
+    else if(entrada == 13) {
+      switch(opcion) {
+        case 1: break;
+        case 2: break;
+        case 3: break;
+        case 4: break;
+        case 5: break;
+        case 6: break;
+        case 7: break;
+      }
+    }
+  } while(opcion != 7 || entrada != 13);
 }
