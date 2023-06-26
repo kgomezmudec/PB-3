@@ -233,7 +233,7 @@ void registrarPlato() {
 }
 
 void asignarMenuPorEstudiante() {
-  int indice, numeroMenu,cantidadMatriculas = 0, cantidadMenusFiltrados = 0, cont = 0;
+  int indice, numeroMenu, cantidadMatriculas = 0, cantidadMenusFiltrados = 0, cont = 0;
   bool menuApto, esNumeroValido = false;
   Consumo consumo;
   Matricula m;
@@ -297,15 +297,13 @@ void asignarMenuPorEstudiante() {
 
   // FIXME: Empiezan los errores
 
-  // En este punto la matricula se encuentra activa, se imprime los menus aptos para el niño.
+  // Cuenta las cantidad de menus para filtrar.
   ifstream archivoMenus("menus.txt", ios::in | ios::binary);
   if(archivoMenus.fail()) {
     cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
     system("pause");
     exit(0);    
-  }
-
-  // Cuenta las cantidad de menus para filtrar.
+  } 
   archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   while(!archivoMenus.eof()) {
     menuApto = true;
@@ -321,7 +319,6 @@ void asignarMenuPorEstudiante() {
       }
       if(!menuApto) break;
     }
-
     if(menuApto) cantidadMenusFiltrados++;
     archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   }
@@ -334,17 +331,16 @@ void asignarMenuPorEstudiante() {
     return;
   }
 
+  // Llena el arreglo de menus aptos para el niño
   ifstream archivoMenuLectura("menus.txt", ios::in | ios::binary);
   if(archivoMenuLectura.fail()){
     cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
     system("pause");
     exit(0); 
   }
-
-  // Llena el arreglo de menus aptos para el niño
   Menu menusAptos[cantidadMenusFiltrados];
-  for(int i = 0; i < cantidadMenusFiltrados; i++) {
-    archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  while(!archivoMenuLectura.eof()) {
     menuApto = true;
     // Recorre las alergias
     for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
@@ -362,6 +358,7 @@ void asignarMenuPorEstudiante() {
       menusAptos[cont] = menu;
       cont++;
     }
+    archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   }
   archivoMenuLectura.close();
 
