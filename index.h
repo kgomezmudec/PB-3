@@ -13,6 +13,9 @@
 // COSTO MIN POR MENU
 #define COSTO_MIN_MENU 5000
 
+// LIMITE MAX DE DIAS (Lunes-Vieres en un Mes)
+#define DIAS_MAX 22 
+
 struct Plato {
   char nombre[50];
   char ingredientes[500];
@@ -48,7 +51,7 @@ struct Matricula {
   bool sePagoMensualidad;
   float facturacion;
   float pagoMensualidad;
-  int dias = 1;
+  int dias = 0;
   int numeroAlergias;
   Ingrediente alergias[100];
 };

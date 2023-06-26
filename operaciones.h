@@ -61,7 +61,7 @@ void gestionRestaurante() {
       switch(opcion) {
         case 1: ingresarMenu(); break;
         case 2: registrarPlato(); break;
-        case 3: break;
+        case 3: asignarMenuPorEstudiante(); break;
         case 4: break;
         case 5: consultas(); break;
         case 6: break;
@@ -233,7 +233,9 @@ void registrarPlato() {
 }
 
 void asignarMenuPorEstudiante() {
-  int indice, cantidadMatriculas = 0, cantidadMenusFiltrados = 0;
+  int indice, numeroMenu,cantidadMatriculas = 0, cantidadMenusFiltrados = 0, cont = 0;
+  bool menuApto, esNumeroValido = false;
+  Consumo consumo;
   Matricula m;
   Menu menu;
   long id;
@@ -242,21 +244,20 @@ void asignarMenuPorEstudiante() {
   cout << "ASIGNAR MENU POR ESTUDIANTE" << endl;
   cout << "Ingrese el numero de matricula: "; cin >> id;
 
+  // Verifica si la matricula no existe. (Finaliza la funcion)
   if(!existeMatricula(id)) {
     cout << ROJO << "El numero de matricula no esta registrado." << DEFECTO << endl;
     system("pause");
     return;
   } 
 
-  // En este punto la matricula existe
+  // Cuenta las cantidad de niños matriculados.
   ifstream archivo("matriculas.txt", ios::in | ios::binary);
   if(archivo.fail()) {
     cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
 		system("pause");
 		exit(0);
   }
-
-  // Cuenta las cantidad de niños matriculados.
   archivo.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
   while(!archivo.eof()) {
     cantidadMatriculas++;
@@ -264,14 +265,13 @@ void asignarMenuPorEstudiante() {
   }
   archivo.close();
 
+  // Pasa las matriculas a un arreglo struct.
   ifstream archivoLectura("matriculas.txt", ios::in | ios::binary);
   if(archivoLectura.fail()) {
     cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
 		system("pause");
 		exit(0);
   }
-
-  // Lena el arreglo de matriculas
   Matricula matriculas[cantidadMatriculas];
   for(int i = 0; i < cantidadMatriculas; i++) {
     archivoLectura.read(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
@@ -279,34 +279,42 @@ void asignarMenuPorEstudiante() {
   }
   archivoLectura.close();
 
-  // Verifica si la matricula esta dada de baja
+  // Verifica si la matricula esta dada de baja (Finaliza la funcion)
   if(!matriculas[indice].estado) {
     cout << ROJO << "Esta matricula esta dada de baja." << DEFECTO << endl;
     system("pause");
     return;
   }
 
+  // Verifica que se ha alcanzado el maximo de dias (Finaliza la funcion)
+  if(matriculas[indice].dias == 22) {
+    cout << ROJO << "Se ha alcanzado el limite de dias para este estudiante." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  cout << "Estudiante: " << matriculas[indice].nombre << endl; 
+
+  // FIXME: Empiezan los errores
+
   // En este punto la matricula se encuentra activa, se imprime los menus aptos para el niño.
   ifstream archivoMenus("menus.txt", ios::in | ios::binary);
-  if(archivo.fail()) {
+  if(archivoMenus.fail()) {
     cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
     system("pause");
     exit(0);    
   }
 
   // Cuenta las cantidad de menus para filtrar.
-  bool menuApto;
   archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
-
-  // Recorre los menus
   while(!archivoMenus.eof()) {
     menuApto = true;
     // Recorre las alergias
     for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
       // Recorre los del menu determinado
-      for(int k = 0; i < menu.cantidadPlatos; k++) {
+      for(int k = 0; k < menu.cantidadPlatos; k++) {
         // Compara la i alergia con k plato del menu actual.
-        if(strstr(matriculas[indice].alergias[i], menu.platos[k]) != NULL) {
+        if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
           menuApto = false;
           break;  
         } 
@@ -319,7 +327,7 @@ void asignarMenuPorEstudiante() {
   }
   archivoMenus.close();
 
-  // Verifica si no hay menus aptos para el niño.
+  // Verifica si no hay menus aptos para el niño. (Finaliza la funcion)
   if(cantidadMenusFiltrados == 0) {
     cout << ROJO << "No hay menus aptos para el estudiante." << DEFECTO << endl;
     system("pause");
@@ -335,33 +343,30 @@ void asignarMenuPorEstudiante() {
 
   // Llena el arreglo de menus aptos para el niño
   Menu menusAptos[cantidadMenusFiltrados];
-  int cont = 0;
   for(int i = 0; i < cantidadMenusFiltrados; i++) {
     archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
-    
     menuApto = true;
     // Recorre las alergias
     for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
       // Recorre los del menu determinado
-      for(int k = 0; i < menu.cantidadPlatos; k++) {
+      for(int k = 0; k < menu.cantidadPlatos; k++) {
         // Compara la i alergia con k plato del menu actual.
-        if(strstr(matriculas[indice].alergias[i], menu.platos[k]) != NULL) {
+        if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
           menuApto = false;
           break;  
         } 
       }
       if(!menuApto) break;
     }
-
     if(menuApto) {
       menusAptos[cont] = menu;
       cont++;
-    };
+    }
   }
+  archivoMenuLectura.close();
 
   // Imprime los menus disponibles
-  cout << "Menus Seleccionables" << endl;
-
+  cout << "Dia " << matriculas[indice].dias + 1 << endl << "Menus Seleccionables" << endl;
   for(int i = 0; i < cantidadMenusFiltrados ; i++) {
     cout << endl << "Menu No. " << menusAptos[i].numero  << endl;
     for(int k = 0; k < menusAptos[i].cantidadPlatos; k++) {
@@ -369,15 +374,53 @@ void asignarMenuPorEstudiante() {
     }
   }
 
-  int n;
-  cout << endl << "Seleccione el menu: "; cin >> n;
-
-  // Verificar que el menu seleccionado este dentro los menus aptos.
+  // Verifica que el menu seleccionado este dentro los menus aptos para registrar el consumo.
   do {
-    
-  } while();
+    cout << endl << "Seleccione el menu: "; cin >> numeroMenu;
+    for(int i = 0; i < cantidadMenusFiltrados; i++) {
+      if(menusAptos[i].numero == numeroMenu) {
+        matriculas[indice].dias++;
+        consumo.idMatricula = matriculas[indice].id;
+        consumo.numeroMenu = numeroMenu;
+        consumo.costeMenu = menusAptos[i].coste;
+        consumo.dia = matriculas[indice].dias;
+        esNumeroValido = true;
+        break;
+      }
+    }
+    if(!esNumeroValido) cout << ROJO << "Escoja el numero de un menu apto." << DEFECTO << endl;
+  } while(!esNumeroValido);
 
-  archivoMenuLectura.close();
+  /**
+   * Redefine los campos banderas, para evitar que la matricula se de de baja o 
+   * quiera efectuar pago sin haber hecho los calculos correspondientes. 
+   * (Respetar las reglas del negocio) 
+   */
+  matriculas[indice].seCalculoFacturacion = matriculas[indice].seCalculoMensualidad = matriculas[indice].sePagoMensualidad = false;
+
+  // Guarda el consumo
+  ofstream archivoConsumo("consumos.txt", ios::app | ios::binary);
+  if(archivoConsumo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  archivoConsumo.write(reinterpret_cast<char *>(&consumo), sizeof(Consumo));
+  archivoConsumo.close();
+
+  // Actualiza las matriculas
+  ofstream archivoMatricula("matriculas.txt", ios::out | ios::binary);
+  if(archivoMatricula.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  for(int i = 0; i < cantidadMatriculas; i++) {
+    archivoMatricula.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+  }
+  archivoMatricula.close();
+
+  cout << VERDE << "Menu asignado exitosamente..." << DEFECTO << endl;
   system("pause");
 }
 
@@ -565,8 +608,7 @@ void matricula() {
 
   // Lee los datos ingresados del usuario
   system("cls");
-  cout << "MATRICULAR ESTUDIANTE" << endl;
-  cout << "Complete los campos." << endl << endl;
+  cout << "MATRICULAR ESTUDIANTE" << endl << "El rango de edad debe ser entre 2 - 5  años" << endl << "Complete los campos." << endl << endl;
 
   do {
     cout << "Numero de la matricula: "; cin >> matricula.id;

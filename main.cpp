@@ -27,6 +27,18 @@ int main() {
   } 
   archivoMatriculasLectura.close();
 
+  ifstream archivoConsumosLectura("consumos.txt", ios::in | ios::binary);
+  if(archivoConsumosLectura.fail()) {
+    ofstream archivoConsumos("consumos.txt", ios::out | ios::binary);
+    if(archivoConsumos.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    archivoConsumos.close();
+  } 
+  archivoConsumosLectura.close();
+
   // MENU PRINCIPAL
   int entrada, opcion = 1;
   do {
