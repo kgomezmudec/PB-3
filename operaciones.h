@@ -15,6 +15,7 @@ void consultaMenu();
 
 void gestionAcademica();
 void matricula();
+void darBajaMatricula();
 
 bool existeMatricula(long id);
 
@@ -287,7 +288,7 @@ void asignarMenuPorEstudiante() {
   }
 
   // Verifica que se ha alcanzado el maximo de dias (Finaliza la funcion)
-  if(matriculas[indice].dias == 22) {
+  if(matriculas[indice].dias == DIAS_MAX) {
     cout << ROJO << "Se ha alcanzado el limite de dias para este estudiante." << DEFECTO << endl;
     system("pause");
     return;
@@ -579,7 +580,7 @@ void gestionAcademica() {
     else if(entrada == 13) {
       switch(opcion) {
         case 1: matricula(); break;
-        case 2: break;
+        case 2: darBajaMatricula(); break;
         case 3: break;
         case 4: break;
         case 5: break;
@@ -588,6 +589,94 @@ void gestionAcademica() {
       }
     }
   } while(opcion != 7 || entrada != 13);
+}
+
+void darBajaMatricula() {
+	long numeroMatricula;
+  int cantidadMatriculas = 0, indice;
+  short diasMaximosPorMes[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+	bool matriculaEncontrada = false;
+	Matricula m;
+
+	system("cls");
+	cout << "DAR DE BAJA MATRICULA\n";
+	cout << "Complete los campos." << endl << endl;
+	
+	// Solicitar numero o ID de matricula
+	cout << "Ingrese el numero de matricula: "; cin >> numeroMatricula;
+	
+	if(existeMatricula(numeroMatricula)) {
+    
+		// Abrir archivo binario de matriculas lectura
+		ifstream archivom("matriculas.txt", ios::in | ios::binary);
+  	if(archivom.fail()) {
+    	cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    	system("pause");
+    	exit(0); 
+  	} 
+
+    // Cuenta las cantidad de matriculas
+    while(archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula))) cantidadMatriculas++;
+    archivom.close();
+
+    // Llena el vector struct 
+    ifstream archivoLectura("matriculas.txt" , ios::in | ios::binary);
+    if(archivoLectura.fail()) {
+    	cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    	system("pause");
+    	exit(0); 
+  	} 
+    Matricula matriculas[cantidadMatriculas];
+    for(int i = 0; i < cantidadMatriculas; i++) {
+      archivoLectura.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+      if(m.id == numeroMatricula) indice = i;
+      matriculas[i] = m;
+    }
+
+    // Verifica si la matricula ya se dio de baja (Finaliza funcion)
+    if(!matriculas[indice].estado) {
+      cout << ROJO << "Esta matricula ya fue dada de baja anteriormente." << DEFECTO << endl;
+      system("pause");
+      return;
+    }
+
+    // Verifica si la matricula esta a paz y salvo (Finaliza funcion)
+    if(!matriculas[indice].sePagoMensualidad) {
+      cout << ROJO << "Esta matricula se encuentra morosa." << endl << "Para dar de baja debe estar paz y salvo" << DEFECTO << endl;
+      system("pause");
+      return;
+    }
+
+    cout << endl << "ESTUDIANTE: " << matriculas[indice].nombre;
+    // Pide los datos
+    do {
+      cout << endl << "Fecha de baja" << endl;  
+      cout << "DD: " ; cin >> matriculas[indice].retiro.dia; 
+      cout << "MM: " ; cin >> matriculas[indice].retiro.mes; 
+      cout << "AAAA: " ; cin >> matriculas[indice].retiro.anio;
+      if(compararFechas(matriculas[indice].retiro, matriculas[indice].ingreso) <= 0) cout << ROJO << "Fecha invalida. Recuerde que para retirarse debe ser una fecha posterior a la de ingreso." << DEFECTO << endl; 
+    } while(compararFechas(matriculas[indice].retiro, matriculas[indice].ingreso) <= 0);
+
+    // Da de baja.
+    matriculas[indice].estado = false;
+
+		// Guardar en el archivo (escribir)
+    ofstream archivoc("matriculas.txt", ios::out | ios::binary);
+    if(archivoc.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    for(int i = 0; i < cantidadMatriculas; i++) {
+      archivoc.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+    }
+    archivoc.close();
+  		
+  	cout << VERDE << "Estudiante dado de baja exitosamente" << DEFECTO << endl;
+  } else {
+  	cout << ROJO << "No se encontro una matricula con el numero " << numeroMatricula << "." << DEFECTO << endl;
+	}
+	system("pause");
 }
 
 void matricula() {

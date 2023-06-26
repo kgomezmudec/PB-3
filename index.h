@@ -66,3 +66,16 @@ struct Consumo {
 void mayusculas(char cadena[]) {
 	for(int i = 0; cadena[i] != '\0'; i++) cadena[i] = toupper(cadena[i]);
 }
+
+int compararFechas(Fecha fecha1, Fecha fecha2) {
+	if (fecha1.anio < fecha2.anio) return -1;
+	else if (fecha1.anio > fecha2.anio) return 1;
+
+	if (fecha1.mes < fecha2.mes) return -1;
+	else if (fecha1.mes > fecha2.mes) return 1;
+
+	if (fecha1.dia < fecha2.dia) return -1;
+	else if (fecha1.dia > fecha2.dia) return 1;
+
+	return 0;  // Las fechas son iguales
+}
