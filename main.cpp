@@ -39,6 +39,18 @@ int main() {
   } 
   archivoConsumosLectura.close();
 
+  ifstream archivoAcudientesLectura("acudientes.txt", ios::in | ios::binary);
+  if(archivoAcudientesLectura.fail()) {
+    ofstream archivoAcudientes("acudientes.txt", ios::out | ios::binary);
+    if(archivoAcudientes.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    archivoAcudientes.close();
+  } 
+  archivoAcudientesLectura.close();
+
   // MENU PRINCIPAL
   int entrada, opcion = 1;
   do {

@@ -9,9 +9,11 @@ void gestionRestaurante();
 void ingresarMenu();
 void registrarPlato();
 void asignarMenuPorEstudiante();
+void facturacion();
 void consultas();
 void consultaListarCarta();
 void consultaMenu();
+// void consultaMenuPorEstudiante();
 
 void gestionAcademica();
 void matricula();
@@ -63,7 +65,7 @@ void gestionRestaurante() {
         case 1: ingresarMenu(); break;
         case 2: registrarPlato(); break;
         case 3: asignarMenuPorEstudiante(); break;
-        case 4: break;
+        case 4: facturacion(); break;
         case 5: consultas(); break;
         case 6: break;
       }
@@ -491,6 +493,85 @@ void consultaListarCarta() {
   }
   archivo.close();
   cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
+}
+
+void facturacion() {
+  int cantidadMatriculas = 0, indice;
+  long id;
+  Matricula m;
+  Consumo c;
+  system("cls");
+  cout << "FACTURACION" << endl << "Ingrese el numero de matricula: "; cin >> id;
+
+  // Verifica si la matricula no existe (Finaliza funcion)
+  if(!existeMatricula(id)) {
+    cout << ROJO << "El numero de matricula ingresado no esta registrado" << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Cuenta las cantidad de matriculas
+  ifstream archivom("matriculas.txt", ios::in | ios::binary);
+  if(archivom.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  while(archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula))) cantidadMatriculas++;
+  archivom.close();
+
+  // Llena el vector struct 
+  ifstream archivoLectura("matriculas.txt" , ios::in | ios::binary);
+  if(archivoLectura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+  Matricula matriculas[cantidadMatriculas];
+  for(int i = 0; i < cantidadMatriculas; i++) {
+    archivoLectura.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+    if(m.id == id) indice = i;
+    matriculas[i] = m;
+  }
+  archivoLectura.close();
+
+  // Verifica si la matricula ya se dio de baja (Finaliza funcion)
+  if(!matriculas[indice].estado) {
+    cout << ROJO << "Esta matricula ya fue dada de baja anteriormente." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Calcula las facturacion
+  ifstream archivoConsumo("consumos.txt", ios::in | ios::binary);
+  if(archivoConsumo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+  matriculas[indice].facturacion = 0;
+  while(archivoConsumo.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
+    if(c.idMatricula == id) matriculas[indice].facturacion += c.costeMenu;
+  }
+  archivoConsumo.close();
+  matriculas[indice].seCalculoFacturacion = true;
+
+  cout << "ESTUDIANTE: " << matriculas[indice].nombre << endl;
+  cout << "Coste comidas realizadas: $" << matriculas[indice].facturacion << endl;
+
+  // Guarda en el archivo
+  ofstream archivo("matriculas.txt", ios::out | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  for(int i = 0; i < cantidadMatriculas; i++) {
+    archivo.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+  }
+  archivo.close();
+
+  cout << ROJO << "[SALIR] " << DEFECTO; system("pause");
 }
 
 void consultaMenu() {
