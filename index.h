@@ -43,8 +43,21 @@ struct Matricula {
   Fecha ingreso;
   Fecha retiro;
   bool estado;
+  bool seCalculoFacturacion;
+  bool seCalculoMensualidad;
+  bool sePagoMensualidad;
+  float facturacion;
+  float pagoMensualidad;
+  int dias = 1;
   int numeroAlergias;
   Ingrediente alergias[100];
+};
+
+struct Consumo {
+  int dia;
+  long idMatricula;
+  int numeroMenu;
+  float costeMenu;
 };
 
 void mayusculas(char cadena[]) {

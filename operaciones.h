@@ -8,6 +8,7 @@ using namespace std;
 void gestionRestaurante();
 void ingresarMenu();
 void registrarPlato();
+void asignarMenuPorEstudiante();
 void consultas();
 void consultaListarCarta();
 void consultaMenu();
@@ -228,6 +229,155 @@ void registrarPlato() {
   archivoEscritura.close();
 
   cout << endl << VERDE << "Los ingredientes de los platos fueron registrados." << DEFECTO << endl;
+  system("pause");
+}
+
+void asignarMenuPorEstudiante() {
+  int indice, cantidadMatriculas = 0, cantidadMenusFiltrados = 0;
+  Matricula m;
+  Menu menu;
+  long id;
+
+  system("cls");
+  cout << "ASIGNAR MENU POR ESTUDIANTE" << endl;
+  cout << "Ingrese el numero de matricula: "; cin >> id;
+
+  if(!existeMatricula(id)) {
+    cout << ROJO << "El numero de matricula no esta registrado." << DEFECTO << endl;
+    system("pause");
+    return;
+  } 
+
+  // En este punto la matricula existe
+  ifstream archivo("matriculas.txt", ios::in | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+  }
+
+  // Cuenta las cantidad de niños matriculados.
+  archivo.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+  while(!archivo.eof()) {
+    cantidadMatriculas++;
+    archivo.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+  }
+  archivo.close();
+
+  ifstream archivoLectura("matriculas.txt", ios::in | ios::binary);
+  if(archivoLectura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+  }
+
+  // Lena el arreglo de matriculas
+  Matricula matriculas[cantidadMatriculas];
+  for(int i = 0; i < cantidadMatriculas; i++) {
+    archivoLectura.read(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+    if(matriculas[i].id == id) indice = i;
+  }
+  archivoLectura.close();
+
+  // Verifica si la matricula esta dada de baja
+  if(!matriculas[indice].estado) {
+    cout << ROJO << "Esta matricula esta dada de baja." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // En este punto la matricula se encuentra activa, se imprime los menus aptos para el niño.
+  ifstream archivoMenus("menus.txt", ios::in | ios::binary);
+  if(archivo.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0);    
+  }
+
+  // Cuenta las cantidad de menus para filtrar.
+  bool menuApto;
+  archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+
+  // Recorre los menus
+  while(!archivoMenus.eof()) {
+    menuApto = true;
+    // Recorre las alergias
+    for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
+      // Recorre los del menu determinado
+      for(int k = 0; i < menu.cantidadPlatos; k++) {
+        // Compara la i alergia con k plato del menu actual.
+        if(strstr(matriculas[indice].alergias[i], menu.platos[k]) != NULL) {
+          menuApto = false;
+          break;  
+        } 
+      }
+      if(!menuApto) break;
+    }
+
+    if(menuApto) cantidadMenusFiltrados++;
+    archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+  }
+  archivoMenus.close();
+
+  // Verifica si no hay menus aptos para el niño.
+  if(cantidadMenusFiltrados == 0) {
+    cout << ROJO << "No hay menus aptos para el estudiante." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  ifstream archivoMenuLectura("menus.txt", ios::in | ios::binary);
+  if(archivoMenuLectura.fail()){
+    cout << ROJO << "Se encontro un error en el archivo menus.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+
+  // Llena el arreglo de menus aptos para el niño
+  Menu menusAptos[cantidadMenusFiltrados];
+  int cont = 0;
+  for(int i = 0; i < cantidadMenusFiltrados; i++) {
+    archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
+    
+    menuApto = true;
+    // Recorre las alergias
+    for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
+      // Recorre los del menu determinado
+      for(int k = 0; i < menu.cantidadPlatos; k++) {
+        // Compara la i alergia con k plato del menu actual.
+        if(strstr(matriculas[indice].alergias[i], menu.platos[k]) != NULL) {
+          menuApto = false;
+          break;  
+        } 
+      }
+      if(!menuApto) break;
+    }
+
+    if(menuApto) {
+      menusAptos[cont] = menu;
+      cont++;
+    };
+  }
+
+  // Imprime los menus disponibles
+  cout << "Menus Seleccionables" << endl;
+
+  for(int i = 0; i < cantidadMenusFiltrados ; i++) {
+    cout << endl << "Menu No. " << menusAptos[i].numero  << endl;
+    for(int k = 0; k < menusAptos[i].cantidadPlatos; k++) {
+      cout << k + 1 << ". " << menusAptos[i].platos[k].nombre << endl;
+    }
+  }
+
+  int n;
+  cout << endl << "Seleccione el menu: "; cin >> n;
+
+  // Verificar que el menu seleccionado este dentro los menus aptos.
+  do {
+    
+  } while();
+
+  archivoMenuLectura.close();
   system("pause");
 }
 
@@ -524,7 +674,7 @@ bool existeMatricula(long id) {
 	}
 	archivo.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
 	while(!archivo.eof()) {
-		if(id ==  matricula.id) {
+		if(id == matricula.id) {
       archivo.close();
       return true;
     }	
