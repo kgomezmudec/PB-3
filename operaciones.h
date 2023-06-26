@@ -295,8 +295,6 @@ void asignarMenuPorEstudiante() {
 
   cout << "Estudiante: " << matriculas[indice].nombre << endl; 
 
-  // FIXME: Empiezan los errores
-
   // Cuenta las cantidad de menus para filtrar.
   ifstream archivoMenus("menus.txt", ios::in | ios::binary);
   if(archivoMenus.fail()) {
