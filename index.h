@@ -49,9 +49,9 @@ struct Matricula {
   Fecha ingreso;
   Fecha retiro;
   bool estado;
-  bool seCalculoFacturacion;
-  bool seCalculoMensualidad;
-  bool sePagoMensualidad;
+  bool seCalculoFacturacion = false;
+  bool seCalculoMensualidad = false;
+  bool sePagoMensualidad = false; 
   float facturacion;
   float pagoMensualidad;
   int dias = 0;

@@ -21,6 +21,7 @@ void darBajaMatricula();
 void registrarAcudiente();
 void calcularMensualidad();
 
+bool existeAcudienteId(long id);
 bool existeMatricula(long id);
 
 // GESTION RESTAURANTE
@@ -940,14 +941,14 @@ void matricula() {
   system("pause");
 }
 
-// FIXME: Pendiente
 void registrarAcudiente() {
   Acudiente acudiente;
+  Matricula matricula;
   long id;
 
   // Lee los datos ingresados del usuario
   system("cls");
-  cout << "INGRESAR ACUDIENTE " << endl << "Complete los campos." << endl << endl;
+  cout << "INGRESAR ACUDIENTE" << endl << "Complete los campos." << endl << endl;
   cout << "Digite el  numero de la matricula del estudiante: "; cin >> id;
   
   // Verifica si la matricula no existe
@@ -957,6 +958,24 @@ void registrarAcudiente() {
     return;
   }
 
+  // Verifica si la matricula fue dada de baja
+  ifstream archivoMatricula("matriculas.txt", ios::in | ios::binary);
+	if(archivoMatricula.fail()) {
+		cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+  archivoMatricula.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+  while(!archivoMatricula.eof()) {
+    if(id == matricula.id and !matricula.estado) {
+      cout << ROJO << "El estudiante esta dado de baja" << endl;
+      system("pause");
+      return;
+    }
+    archivoMatricula.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+  }
+  archivoMatricula.close();
+
   acudiente.id_afilado = id;
 
   // Datos del acudiente
@@ -964,7 +983,8 @@ void registrarAcudiente() {
   do {
     cout << "ID: "; cin >> acudiente.id;
     if(acudiente.id <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
-  } while(acudiente.id <= 0);
+    if(existeAcudienteId(acudiente.id)) cout << ROJO << "El acudiente ya ha sido registrado previamente" << DEFECTO << endl;
+  } while(acudiente.id <= 0 or existeAcudienteId(acudiente.id));
 
   do {
     cout << "Nombre: "; fflush(stdin); gets(acudiente.nombre);    
@@ -1108,6 +1128,26 @@ void calcularMensualidad() {
   cout << "ESTUDIANTE: " << matriculas[indice].nombre << endl;
   cout << "Costo de la mensualidad: $" << matriculas[indice].pagoMensualidad << endl;
   cout << ROJO << "[SALIR] " << DEFECTO; system("pause");  
+}
+
+bool existeAcudienteId(long id) {
+	Acudiente acudiente;
+	ifstream archivo("acudientes.txt", ios::in | ios::binary);
+	if(archivo.fail()) {
+		cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+	archivo.read(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));
+	while(!archivo.eof()) {
+		if(id == acudiente.id) {
+      archivo.close();
+      return true;
+    }	
+		archivo.read(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));	
+	}	
+	archivo.close();
+	return false;
 }
 
 bool existeMatricula(long id) {
