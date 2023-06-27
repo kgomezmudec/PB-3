@@ -971,6 +971,9 @@ void registrarAcudiente() {
       cout << ROJO << "El estudiante esta dado de baja" << endl;
       system("pause");
       return;
+    } else if (id == matricula.id and matricula.estado) {
+      cout << endl << "ESTUDIANTE: " << matricula.nombre << endl;
+      break;
     }
     archivoMatricula.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
   }
@@ -979,7 +982,7 @@ void registrarAcudiente() {
   acudiente.id_afilado = id;
 
   // Datos del acudiente
-  cout << endl << "DATOS DEL ACUDIENTE" << endl;
+  cout << "DATOS DEL ACUDIENTE" << endl;
   do {
     cout << "ID: "; cin >> acudiente.id;
     if(acudiente.id <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
