@@ -22,6 +22,8 @@ void registrarAcudiente();
 void calcularMensualidad();
 void pagarMensualidad();
 void consultasAcademica();
+void listaActivos();
+void listaConBajas();
 
 int validacionAbonanteId(long id, long id_afiliado);
 bool existeAcudienteId(long id);
@@ -1216,13 +1218,13 @@ void pagarMensualidad() {
     acudiente.id = idAcudiente;
     acudiente.id_afilado = id;
     do {
-      cout << "Nombre del abonante : "; fflush(stdin); gets(acudiente.nombre);   
+      cout << "Nombre del abonante: "; fflush(stdin); gets(acudiente.nombre);   
       // Revisa que el nombre no este vacio
       if(acudiente.nombre[0] == '\0') cout << ROJO << "El nombre del abonante no puede estar vacio." << DEFECTO << endl;
     } while(acudiente.nombre[0] == '\0');
     
     do {
-      cout << "Direccion del abonante : "; fflush(stdin); gets(acudiente.direccion);   
+      cout << "Direccion del abonante: "; fflush(stdin); gets(acudiente.direccion);   
       // Revisa que la direccion no este vacia
       if(acudiente.direccion[0] == '\0') cout << ROJO << "La dirrecion del acudiente no puede estar vacio." << DEFECTO << endl;
     } while(acudiente.direccion[0] == '\0');
@@ -1325,7 +1327,7 @@ void pagarMensualidad() {
     exit(0); 
   }
   while(archivoConsumos.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
-    if(c.idMatricula != acudiente.id_afilado) cantidadConsumos++;
+    if(c.idMatricula != id) cantidadConsumos++;
   }
   archivoConsumos.close();
 
@@ -1338,7 +1340,7 @@ void pagarMensualidad() {
     exit(0); 
   }
   while(archivoConsumosLectura.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
-    if(c.idMatricula != acudiente.id_afilado) {
+    if(c.idMatricula != id) {
       consumos[cont] = c;
       cont++;
     }
@@ -1399,14 +1401,90 @@ void consultasAcademica() {
      */ 
     else if(entrada == 13) {
       switch(opcion) {
-        case 1: break;
-        case 2: break;
+        case 1: listaActivos(); break;
+        case 2: listaConBajas(); break;
         case 3: break;
         case 4: break;
         case 5: break;
       }
     }
   } while(opcion != 5 || entrada != 13);
+}
+
+void listaActivos() {
+	Matricula matricula;
+  Acudiente acudientes;
+  bool bandera;
+	
+  ifstream archivop("matriculas.txt", ios::in | ios::binary);
+	if(archivop.fail()){
+		cout << ROJO << "Error al abrir el archivo matriculas.txt" << endl;
+		system("pause");
+		exit(0);
+	}
+  
+  system("cls");
+	cout << "----------- Lista de Estudiantes Activos -----------" << endl << endl;
+
+	archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+	while(!archivop.eof()){
+		if(matricula.estado){
+      bandera = false;
+			cout << "Numero de matricula: " << matricula.id << endl;	
+			cout << "Nombre del estudiante: " << matricula.nombre << endl;	
+
+			ifstream archivo("acudientes.txt", ios::in | ios::binary);
+	    if(archivo.fail()){
+		    cout<<"Error al abrir el archivo acudientes.txt"<<endl;
+		    system("pause");
+		    exit(0);
+	    }
+		  archivo.read(reinterpret_cast<char *>(&acudientes), sizeof(Acudiente));	
+      while (!archivo.eof()){
+        if (matricula.id == acudientes.id_afilado){
+          cout << "Nombre del acudiente: " << acudientes.nombre << endl;
+          cout << "Telefono del acudiente: "<< acudientes.telefono << endl;
+          bandera = true;
+        }
+        archivo.read(reinterpret_cast<char *>(&acudientes), sizeof(Acudiente));
+      }
+      archivo.close();
+      if(!bandera) cout << "Acudiente aun no registrado" << endl;
+	  }
+    cout << "----------------------------------------------------" << endl;
+    archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+	}
+  archivop.close();
+  system("pause");
+}
+
+void listaConBajas() {
+	Matricula matricula;
+  Acudiente acudientes;
+  bool bandera;
+	
+  ifstream archivop("matriculas.txt", ios::in | ios::binary);
+	if(archivop.fail()){
+		cout << ROJO << "Error al abrir el archivo matriculas.txt" << endl;
+		system("pause");
+		exit(0);
+	}
+	
+  system("cls");
+	cout << "----------- Lista de Estudiantes Con Bajas -----------" << endl << endl;
+	archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+	while(!archivop.eof()) {
+		if(!matricula.estado) {
+			cout << "Numero de matricula: " << matricula.id << endl;	
+			cout << "Nombre del estudainte: " << matricula.nombre << endl;		
+			cout << "Fecha de ingreso: " << matricula.ingreso.dia << "/" << matricula.ingreso.mes << "/" << matricula.ingreso.anio << endl;
+      cout << "Fecha de baja: " << matricula.retiro.dia << "/" << matricula.retiro.mes << "/" << matricula.retiro.anio << endl;
+      cout << "----------------------------------------------------" << endl;
+	  }
+    archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
+	}
+  archivop.close();
+  system("pause");
 }
 
 bool existeAcudienteId(long id) {
