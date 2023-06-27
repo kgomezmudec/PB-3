@@ -932,24 +932,42 @@ void registrarAcudiente() {
   system("pause");
 }
 
-// TODO: (ALMOST DONE) Guardar el costo fijo en un archivo
 void calcularMensualidad() {
-  static bool primeraVez = true;
-  static float costoFijo;
   long id, facturacion, mensualidad;
-  int contMatricula = 0, indice;
+  int contMatricula = 0, existeCosto = 0, indice;
+  CostoFijo costoFijo;
   Matricula i;
-  
+
   system("cls");
-  // Si ingresa por primera vez se le pide el coste fijo.
-  if(primeraVez) {
+  // Verifica si no esta el coste fijo definido
+  ifstream archivoa("costo.txt", ios::in | ios::binary);
+  if(archivoa.fail()){
     do {
-      cout << "Ingrese el coste fijo: $"; cin >> costoFijo;
-      if(costoFijo < COSTO_FIJO_MIN) cout << ROJO << "El costo fijo no debe ser inferior a $" << COSTO_FIJO_MIN << "." << DEFECTO << endl;
-    } while(costoFijo < COSTO_FIJO_MIN); 
-    primeraVez = false;
-    system("cls");
+      cout << "Ingrese el coste fijo: $"; cin >> costoFijo.valor;
+      if(costoFijo.valor < COSTO_FIJO_MIN) cout << ROJO << "El costo fijo no debe ser inferior a $" << COSTO_FIJO_MIN << "." << DEFECTO << endl;
+    } while(costoFijo.valor < COSTO_FIJO_MIN); 
+
+    // Guarda en el archivo el coste fijo
+    ofstream archivo("costo.txt", ios::out | ios::binary);
+    if(archivo.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      system("pause");
+      exit(0); 
+    } 
+    archivo.write(reinterpret_cast<char *>(&costoFijo), sizeof(CostoFijo));
+    archivo.close();
   }
+
+  system("cls");
+  // Lee el archivo del costo fijo
+  ifstream archivoc("costo.txt", ios::in | ios::binary);
+  if(archivoc.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+  archivoc.read(reinterpret_cast<char *>(&costoFijo), sizeof(CostoFijo));
+  archivoc.close();
 
   // Lee los datos ingresados del usuario
   cout << "CALCULAR PAGO MENSUALIDAD DE ESTUDIANTE" << endl;
@@ -1002,7 +1020,7 @@ void calcularMensualidad() {
   }
 
   // Si esta activo y tiene la facturacion ok, calculara la mensualidad
-  matriculas[indice].pagoMensualidad = costoFijo + matriculas[indice].facturacion;
+  matriculas[indice].pagoMensualidad = costoFijo.valor + matriculas[indice].facturacion;
   matriculas[indice].seCalculoMensualidad = true;
 
   // Guarda en el archivo
