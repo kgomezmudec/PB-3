@@ -972,7 +972,7 @@ void registrarAcudiente() {
   archivoMatricula.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
   while(!archivoMatricula.eof()) {
     if(id == matricula.id and !matricula.estado) {
-      cout << ROJO << "El estudiante esta dado de baja" << endl;
+      cout << ROJO << "El estudiante esta dado de baja" << DEFECTO << endl;
       system("pause");
       return;
     } else if (id == matricula.id and matricula.estado) {
@@ -1137,13 +1137,12 @@ void calcularMensualidad() {
   cout << ROJO << "[SALIR] " << DEFECTO; system("pause");  
 }
 
-// FIXME:
 void pagarMensualidad() {
   Matricula i;
-  Acudiente acudiente;
+  Acudiente acudiente, m;
   Consumo c;
-  int contMatricula = 0, indice, cantidadConsumos = 0, cont = 0;
-  long id;
+  int contMatricula = 0, indice, indice1, cantidadConsumos = 0, cont = 0, contAcudientes = 0;
+  long id, idAcudiente;
 
   // Lee los datos ingresados del usuario
   system("cls");
@@ -1206,14 +1205,15 @@ void pagarMensualidad() {
   cout << "ESTUDIANTE: " << matriculas[indice].nombre << endl;
   cout << "DATOS DEL ABONANTE" << endl;
   do {
-    cout << "DNI: "; cin >> acudiente.id;   
+    cout << "DNI: "; cin >> idAcudiente;   
     // Revisa que el ID sea un numero positivo
-    if(acudiente.id <= 0) cout << ROJO << "El DNI tiene que ser mayor en 0." << DEFECTO << endl;
-    if(validacionAbonanteId(acudiente.id, id) == 0) cout << ROJO << "El DNI ingresado esta relacionado con otra matricula." << DEFECTO << endl;
-  } while(acudiente.id <= 0 or validacionAbonanteId(acudiente.id, id) == 0);
+    if(idAcudiente <= 0) cout << ROJO << "El DNI tiene que ser mayor en 0." << DEFECTO << endl;
+    if(validacionAbonanteId(idAcudiente, id) == 0) cout << ROJO << "El DNI ingresado esta relacionado con otra matricula." << DEFECTO << endl;
+  } while(idAcudiente <= 0 or validacionAbonanteId(idAcudiente, id) == 0);
   
   // Si el DNI del acudiente no se encuentra registrado, registra los datos.
-  if(validacionAbonanteId(acudiente.id, id) == -1) {
+  if(validacionAbonanteId(idAcudiente, id) == -1) {
+    acudiente.id = idAcudiente;
     acudiente.id_afilado = id;
     do {
       cout << "Nombre del abonante : "; fflush(stdin); gets(acudiente.nombre);   
@@ -1249,17 +1249,55 @@ void pagarMensualidad() {
     }
     archivoEscrituraA.write(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));
     archivoEscrituraA.close();
-  }
+  } else if(validacionAbonanteId(acudiente.id, id) == 1) { // Si el DNI del acudiente ya se encuentra relacionado con la matricula.
+    cout << "El id ya se registro como acudiente previamente" <<endl;
+    //Abre el archivo
+    ifstream archivot("acudientes.txt", ios::in | ios::binary);
+    if(archivot.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
 
-  // TODO: Pendiente cambio
-  // Si el DNI del acudiente ya se encuentra relacionado con la matricula.
-  if(validacionAbonanteId(acudiente.id, id) == 1) {
-    cout << "El DNI ya se registro como acudiente previamente" <<endl;
-    do {
-      cout << "Digite el numero de la cuenta corriente: "; cin >> acudiente.cuenta;
-      if(acudiente.cuenta <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
-    } while(acudiente.cuenta <= 0);
-    acudiente.abonante = true;
+    //Cuenta la cantidad de acudientes
+    while(archivot.read(reinterpret_cast<char *>(&m), sizeof(Acudiente))) contAcudientes++;
+    archivot.close();
+
+    ifstream archivoLecturaC("acudientes.txt", ios::in | ios::binary);
+    if(archivoLecturaC.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+      system("pause");
+      exit(0); 
+    } 
+    //Asigna un array struct con la canitdad de acudientes
+    Acudiente acudientes[contAcudientes];
+    //Pasa los datos del archivo al array struct y encuentra la posicion del id
+    for(int t = 0; t < contAcudientes; t++){
+      archivoLecturaC.read(reinterpret_cast<char *>(&acudientes[t]), sizeof(Matricula));
+      if(acudientes[t].id == idAcudiente) indice1 = t;
+    }
+    archivoLecturaC.close();
+
+    //Mira si el acudiente es la primera vez que abona 
+    if (!acudientes[indice1].abonante) {
+      do {
+        cout << "Digite el numero de la cuenta corriente: "; cin >> acudiente.cuenta;
+        if(acudientes[indice1].cuenta <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
+      } while(acudientes[indice1].cuenta <= 0);
+      acudientes[indice1].abonante = true;
+
+      // Guarda los acudientes actualizados
+      ofstream archivoEscritura("acudientes.txt", ios::out | ios::binary);
+      if(archivoEscritura.fail()) {
+        cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+        system("pause");
+        exit(0); 
+      } 
+      for(int i = 0; i < contAcudientes; i++) {
+        archivoEscritura.write(reinterpret_cast<char *>(&acudientes[i]), sizeof(Matricula));
+      }
+      archivoEscritura.close();
+    }
   }
 
   matriculas[indice].dias = 0;
@@ -1319,7 +1357,7 @@ void pagarMensualidad() {
   }
   archivoConsumosEscritura.close();
 
-  cout << endl << VERDE << "Pago hecho exitosamente..." << DEFECTO << endl;
+  cout << endl << VERDE << "Pago exitoso..." << DEFECTO << endl;
   system("pause");
 }
 
