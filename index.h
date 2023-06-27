@@ -58,9 +58,19 @@ struct Matricula {
 
 struct Consumo {
   int dia;
+  char nombreMatricula[50];
   long idMatricula;
   int numeroMenu;
   float costeMenu;
+};
+
+struct Acudiente {
+  long id;
+  char nombre[50];
+  char direccion[70];
+  long telefono;
+  char parentesco[50];
+  long id_afilado;
 };
 
 void mayusculas(char cadena[]) {
