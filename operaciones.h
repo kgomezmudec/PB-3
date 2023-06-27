@@ -10,7 +10,7 @@ void ingresarMenu();
 void registrarPlato();
 void asignarMenuPorEstudiante();
 void facturacion();
-void consultas();
+void consultasRestaurante();
 void consultaListarCarta();
 void consultaMenu();
 void consultaMenuPorEstudiante();
@@ -20,9 +20,13 @@ void matricula();
 void darBajaMatricula();
 void registrarAcudiente();
 void calcularMensualidad();
+void pagarMensualidad();
+void consultasAcademica();
 
+int validacionAbonanteId(long id, long id_afiliado);
 bool existeAcudienteId(long id);
 bool existeMatricula(long id);
+bool validaFechaIngreso(Fecha fecha1, Fecha fecha2);
 
 // GESTION RESTAURANTE
 
@@ -69,7 +73,7 @@ void gestionRestaurante() {
         case 2: registrarPlato(); break;
         case 3: asignarMenuPorEstudiante(); break;
         case 4: facturacion(); break;
-        case 5: consultas(); break;
+        case 5: consultasRestaurante(); break;
         case 6: break;
       }
     }
@@ -430,7 +434,7 @@ void asignarMenuPorEstudiante() {
   system("pause");
 }
 
-void consultas() {
+void consultasRestaurante() {
   int entrada, opcion = 1;
   do {
     system("cls");
@@ -699,8 +703,8 @@ void gestionAcademica() {
         case 2: darBajaMatricula(); break;
         case 3: registrarAcudiente(); break;
         case 4: calcularMensualidad(); break;
-        case 5: break;
-        case 6: break;
+        case 5: pagarMensualidad(); break;
+        case 6: consultasAcademica(); break;
         case 7: break;
       }
     }
@@ -794,7 +798,7 @@ void darBajaMatricula() {
     // Cuenta la cantidad de consumos que no seran eliminados
     ifstream archivoConsumos("consumos.txt", ios::in | ios::binary);
     if(archivoConsumos.fail()) {
-      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
       system("pause");
       exit(0); 
     }
@@ -807,7 +811,7 @@ void darBajaMatricula() {
     Consumo consumos[cantidadConsumos];
     ifstream archivoConsumosLectura("consumos.txt", ios::in | ios::binary);
     if(archivoConsumosLectura.fail()) {
-      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
       system("pause");
       exit(0); 
     }
@@ -822,7 +826,7 @@ void darBajaMatricula() {
     // Guarda los consumos actualizados
     ofstream archivoConsumosEscritura("consumos.txt", ios::out | ios::binary);
     if(archivoConsumosEscritura.fail()) {
-      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
       system("pause");
       exit(0); 
     }
@@ -838,6 +842,7 @@ void darBajaMatricula() {
 	system("pause");
 }
 
+// TODO: Verificar fecha de ingreso
 void matricula() {
   Matricula matricula;
   
@@ -859,28 +864,36 @@ void matricula() {
   } while(matricula.nombre[0] == '\0');
   
   // Ingresa la fecha de naciemiento: Rango de edad 2-5 años
-  cout << endl << "Fecha de nacimiento" << endl;
+  cout << endl << "Fecha de nacimiento (DD/MM/AAAA)" << endl;
   short diasMaximosPorMesA[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   
   do {
-		cout << "Año: "; cin >> matricula.nacimiento.anio;
-		if(matricula.nacimiento.anio < 2018|| matricula.nacimiento.anio > 2021) cout << ROJO << "El estudiante no tiene la edad para entrar en la guarderia." << DEFECTO << endl;
-	} while(matricula.nacimiento.anio < 2018|| matricula.nacimiento.anio > 2021);
+		cout << "AAAA: "; cin >> matricula.nacimiento.anio;
+		if(matricula.nacimiento.anio < 2000) cout << ROJO << "Rango a partir del 2000's." << DEFECTO << endl;
+	} while(matricula.nacimiento.anio < 2000);
 
 	// Verifica si es año biciesto, cambia el dia maximo para febrero.
 	if((matricula.nacimiento.anio % 4 == 0 && matricula.nacimiento.anio % 100 != 0) || (matricula.nacimiento.anio % 400 == 0)) diasMaximosPorMesA[1] = 29;
 
 	do {
-		cout << "Mes: "; cin >> matricula.nacimiento.mes;
+		cout << "MM: "; cin >> matricula.nacimiento.mes;
 		if(matricula.nacimiento.mes < 1 || matricula.nacimiento.mes > 12) cout << ROJO << "El mes ingresado debe estar comprendido entre 1 y 12." << DEFECTO << endl;
 	} while(matricula.nacimiento.mes < 1 || matricula.nacimiento.mes > 12);
 
 	do {
-		cout << "Dia: "; cin >> matricula.nacimiento.dia;
+		cout << "DD: "; cin >> matricula.nacimiento.dia;
 		if(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]) cout << ROJO << "El dia ingresado debe estar comprendido entre 1 y " << diasMaximosPorMesA[matricula.nacimiento.mes - 1] << "." << DEFECTO << endl;
 	} while(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]);
 
-  cout << endl << "Fecha de ingreso" << endl;
+  do {
+    cout << endl << "Fecha de ingreso (DD/MM/AAAA)" << endl;
+    cout << "DD: " ; cin >> matricula.ingreso.dia; 
+    cout << "MM: " ; cin >> matricula.ingreso.mes; 
+    cout << "AAAA: " ; cin >> matricula.ingreso.anio;
+    if(validaFechaIngreso(matricula.nacimiento, matricula.ingreso)) cout << ROJO << "Fecha invalida. Recuerde que el niño debe tener entreo 2 - 5 años" << DEFECTO << endl; 
+  } while(validaFechaIngreso(matricula.nacimiento, matricula.ingreso));
+
+
 	short diasMaximosPorMesB[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 	do {
@@ -1133,6 +1146,239 @@ void calcularMensualidad() {
   cout << ROJO << "[SALIR] " << DEFECTO; system("pause");  
 }
 
+void pagarMensualidad() {
+  Matricula i;
+  Acudiente acudiente;
+  Consumo c;
+  int contMatricula = 0, indice, cantidadConsumos = 0, cont = 0;
+  long id;
+
+  // Lee los datos ingresados del usuario
+  system("cls");
+  cout << "PAGAR MENSUALIDAD DE ESTUDIANTE" << endl;
+  cout << "Complete los campos." << endl << endl;
+  cout << "Ingrese el numero de matricula del estudiante: "; cin >> id;
+  
+  // Verifica si la matricula no exite. (Finaliza funcion)
+  if(!existeMatricula(id)) {
+    cout << ROJO << "Matricula no registrada." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Cuenta la cantidad de matriculas
+  ifstream archivot("matriculas.txt", ios::in | ios::binary);
+  if(archivot.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  while(archivot.read(reinterpret_cast<char *>(&i), sizeof(Matricula))) contMatricula++;
+  archivot.close();
+
+  // LLena el arreglo de matriculas 
+  ifstream archivoLecturab("matriculas.txt", ios::in | ios::binary);
+  if(archivoLecturab.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+  Matricula matriculas[contMatricula];
+  for(int k = 0; k < contMatricula; k++){
+    archivoLecturab.read(reinterpret_cast<char *>(&matriculas[k]), sizeof(Matricula));
+    if(matriculas[k].id == id) indice = k;
+  }
+  archivoLecturab.close();
+
+  // Verifica si la matricula fue dada de baja. (Finaliza funcion)
+  if(!matriculas[indice].estado) {
+    cout << ROJO << "La matricula fue dada de baja." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Verifica si no se calculo la mensualidad. (Finaliza funcion)
+  if(!matriculas[indice].seCalculoMensualidad) {
+    cout << ROJO << "Debe calcular la mensualidad antes." << DEFECTO << endl;
+    system("pause");
+    return; 
+  }
+
+  // Verifica si ya esta paz y salvo (Finaliza funcion)
+  if(matriculas[indice].sePagoMensualidad) {
+    cout << ROJO << "El estudiante se encuentra paz y salvo." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  cout << "ESTUDIANTE: " << matriculas[indice].nombre << endl;
+  cout << "DATOS DEL ABONANTE" << endl;
+  do {
+    cout << "DNI: "; cin >> acudiente.id;   
+    // Revisa que el ID sea un numero positivo
+    if(acudiente.id <= 0) cout << ROJO << "El DNI tiene que ser mayor en 0." << DEFECTO << endl;
+    if(validacionAbonanteId(acudiente.id, id) == 0) cout << ROJO << "El DNI ingresado esta relacionado con otra matricula." << DEFECTO << endl;
+  } while(acudiente.id <= 0 or validacionAbonanteId(acudiente.id, id) == 0);
+  
+  // Si el DNI del acudiente no se encuentra registrado, registra los datos.
+  if(validacionAbonanteId(acudiente.id, id) == -1) {
+    acudiente.id_afilado = id;
+    do {
+      cout << "Nombre del abonante : "; fflush(stdin); gets(acudiente.nombre);   
+      // Revisa que el nombre no este vacio
+      if(acudiente.nombre[0] == '\0') cout << ROJO << "El nombre del abonante no puede estar vacio." << DEFECTO << endl;
+    } while(acudiente.nombre[0] == '\0');
+    
+    do {
+      cout << "Direccion del abonante : "; fflush(stdin); gets(acudiente.direccion);   
+      // Revisa que la direccion no este vacia
+      if(acudiente.direccion[0] == '\0') cout << ROJO << "La dirrecion del acudiente no puede estar vacio." << DEFECTO << endl;
+    } while(acudiente.direccion[0] == '\0');
+
+    do {
+      cout << "Telefono del abonante: "; cin >> acudiente.telefono;
+      if(acudiente.telefono <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
+    } while(acudiente.telefono <= 0);
+
+    do {
+      cout << "Numero de la cuenta corriente: "; cin >> acudiente.cuenta;
+      if(acudiente.cuenta <= 0) {
+        cout << ROJO << "Fuera de rango" << DEFECTO << endl;
+      }
+    } while(acudiente.cuenta <= 0);
+    acudiente.abonante = true;
+
+    // Guarda el acudiente  
+    ofstream archivoEscrituraA("acudientes.txt", ios::app | ios::binary);
+    if(archivoEscrituraA.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    archivoEscrituraA.write(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));
+    archivoEscrituraA.close();
+  }
+
+  // TODO: Pendiente cambio
+  // Si el DNI del acudiente ya se encuentra relacionado con la matricula.
+  if(validacionAbonanteId(acudiente.id, id) == 1) {
+    cout << "El DNI ya se registro como acudiente previamente" <<endl;
+    do {
+      cout << "Digite el numero de la cuenta corriente: "; cin >> acudiente.cuenta;
+      if(acudiente.cuenta <= 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
+    } while(acudiente.cuenta <= 0);
+    acudiente.abonante = true;
+  }
+
+  matriculas[indice].dias = 0;
+  matriculas[indice].pagoMensualidad = 0;
+  matriculas[indice].sePagoMensualidad = true;
+ 
+  // Guarda en el archivo las matriculas actualizadas
+  ofstream archivoEscritura("matriculas.txt", ios::out | ios::binary);
+  if(archivoEscritura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+    system("pause");
+    exit(0); 
+  } 
+  for(int i = 0; i < contMatricula; i++) {
+    archivoEscritura.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+  }
+  archivoEscritura.close();
+
+  // Elimina los consumos de la matricula paga
+  // Cuenta la cantidad de consumos que no seran eliminados
+  ifstream archivoConsumos("consumos.txt", ios::in | ios::binary);
+  if(archivoConsumos.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  while(archivoConsumos.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
+    if(c.idMatricula != acudiente.id_afilado) cantidadConsumos++;
+  }
+  archivoConsumos.close();
+
+  // LLena el arreglo de consumos
+  Consumo consumos[cantidadConsumos];
+  ifstream archivoConsumosLectura("consumos.txt", ios::in | ios::binary);
+  if(archivoConsumosLectura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  while(archivoConsumosLectura.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
+    if(c.idMatricula != acudiente.id_afilado) {
+      consumos[cont] = c;
+      cont++;
+    }
+  }
+  archivoConsumosLectura.close();
+
+  // Guarda los consumos actualizados
+  ofstream archivoConsumosEscritura("consumos.txt", ios::out | ios::binary);
+  if(archivoConsumosEscritura.fail()) {
+    cout << ROJO << "Se encontro un error en el archivo consumos.txt." << endl;
+    system("pause");
+    exit(0); 
+  }
+  for(int i = 0; i < cantidadConsumos; i++) {
+    archivoConsumosEscritura.write(reinterpret_cast<char *>(&consumos[i]), sizeof(Consumo));
+  }
+  archivoConsumosEscritura.close();
+
+  cout << endl << VERDE << "abonante ingresado exitosamente..." << DEFECTO << endl;
+  system("pause");
+}
+
+void consultasAcademica() {
+  int entrada, opcion = 1;
+  do {
+    system("cls");
+    cout << DEFECTO << "CONSULTAS (GESTION ACADEMICA)" << endl;
+    cout << DEFECTO << "Utilice las flechas del teclado para desplazarse." << endl;
+    cout << DEFECTO << "Utilice el enter para escoger su opcion." << endl << endl;
+    cout << DEFECTO << "Seleccione una opcion: " << endl << endl;
+    cout << (opcion == 1 ? AZUL : "") << (opcion == 1 ? "> " : "") << (opcion == 1 ? DEFECTO : GRIS) << "Listar estudiantes activos" << endl;
+    cout << (opcion == 2 ? AZUL : "") << (opcion == 2 ? "> " : "") << (opcion == 2 ? DEFECTO : GRIS) << "Listar estudiantes con baja" << endl;
+    cout << (opcion == 3 ? AZUL : "") << (opcion == 3 ? "> " : "") << (opcion == 3 ? DEFECTO : GRIS) << "Reporte de estado financiero de estudiantes" << endl; 
+    cout << (opcion == 4 ? AZUL : "") << (opcion == 4 ? "> " : "") << (opcion == 4 ? DEFECTO : GRIS) << "Consulta por estudiante" << endl;
+    cout << (opcion == 5 ? AZUL : "") << (opcion == 5 ? "> " : "") << (opcion == 5 ? DEFECTO : GRIS) << "Salir" << endl;
+    cout << DEFECTO;
+
+    /**
+     * Mediante el codigo ASCII de las flechas del teclado, podemos realizar
+     * la seleccion de opciones disponibles en el menu. Teniendo en cuenta:
+     * Codigo ASCII para las flechas: 224
+     * Codigo ASCII para la flecha hacia arriba: 72.
+     * Codigo ASCII para la flecha hacia la derecha: 77.
+     * Codigo ASCII para la flecha hacia abajo: 80.
+     * Codigo ASCII para la flecha hacia la izquierda: 75.
+     * Codigo ASCII para el enter: 13.
+     */
+    entrada = getch();
+    if(entrada == 224) {
+      entrada = getch();
+      if(entrada == 80 || entrada == 77) opcion = (opcion == 5) ? 1 : opcion + 1;
+      if(entrada == 72 || entrada == 75) opcion = (opcion == 1) ? 5 : opcion - 1;
+    }
+
+    /**
+     * Una vez confirmada la opción del usuario y teniendo en cuenta el codigo ASCII 
+     * del enter (13) se gestiona la selección.
+     */ 
+    else if(entrada == 13) {
+      switch(opcion) {
+        case 1: break;
+        case 2: break;
+        case 3: break;
+        case 4: break;
+        case 5: break;
+      }
+    }
+  } while(opcion != 5 || entrada != 13);
+}
+
 bool existeAcudienteId(long id) {
 	Acudiente acudiente;
 	ifstream archivo("acudientes.txt", ios::in | ios::binary);
@@ -1153,6 +1399,30 @@ bool existeAcudienteId(long id) {
 	return false;
 }
 
+int validacionAbonanteId(long id, long id_afiliado) {
+	Acudiente acudiente;
+	ifstream archivo("acudientes.txt", ios::in | ios::binary);
+	if(archivo.fail()) {
+		cout << ROJO << "Se encontro un error en el archivo acudientes.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+	archivo.read(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));
+	while(!archivo.eof()) {
+		if(id == acudiente.id and id_afiliado == acudiente.id_afilado) {
+      archivo.close();
+      return 1;
+    }
+    if(id == acudiente.id){
+      archivo.close();
+      return 0;
+    }
+		archivo.read(reinterpret_cast<char *>(&acudiente), sizeof(Acudiente));	
+	}	
+	archivo.close();
+	return -1;
+}
+
 bool existeMatricula(long id) {
 	Matricula matricula;
 	ifstream archivo("matriculas.txt", ios::in | ios::binary);
@@ -1171,4 +1441,8 @@ bool existeMatricula(long id) {
 	}	
 	archivo.close();
 	return false;
+}
+
+bool validaFechaIngreso(Fecha fecha1, Fecha fecha2) {
+  return 0;
 }

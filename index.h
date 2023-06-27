@@ -74,6 +74,8 @@ struct Acudiente {
   long telefono;
   char parentesco[50];
   long id_afilado;
+  long cuenta;
+  bool abonante;
 };
 
 struct CostoFijo {
