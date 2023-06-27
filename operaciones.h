@@ -678,13 +678,13 @@ void gestionAcademica() {
   } while(opcion != 7 || entrada != 13);
 }
 
-// TODO: Eliminar los consumos del estudiante que se dio de baja
 void darBajaMatricula() {
 	long numeroMatricula;
-  int cantidadMatriculas = 0, indice;
+  int cantidadMatriculas = 0, cantidadConsumos = 0, cont = 0, indice;
   short diasMaximosPorMes[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	bool matriculaEncontrada = false;
 	Matricula m;
+  Consumo c;
 
 	system("cls");
 	cout << "DAR DE BAJA MATRICULA\n";
@@ -720,6 +720,7 @@ void darBajaMatricula() {
       if(m.id == numeroMatricula) indice = i;
       matriculas[i] = m;
     }
+    archivoLectura.close();
 
     // Verifica si la matricula ya se dio de baja (Finaliza funcion)
     if(!matriculas[indice].estado) {
@@ -759,6 +760,47 @@ void darBajaMatricula() {
       archivoc.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
     }
     archivoc.close();
+
+    // --- Elimina los consumos del estudiante dado de baja
+    // Cuenta la cantidad de consumos que no seran eliminados
+    ifstream archivoConsumos("consumos.txt", ios::in | ios::binary);
+    if(archivoConsumos.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    while(archivoConsumos.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
+      if(c.idMatricula != numeroMatricula) cantidadConsumos++;
+    }
+    archivoConsumos.close();
+
+    // LLena el arreglo de consumos
+    Consumo consumos[cantidadConsumos];
+    ifstream archivoConsumosLectura("consumos.txt", ios::in | ios::binary);
+    if(archivoConsumosLectura.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    while(archivoConsumosLectura.read(reinterpret_cast<char *>(&c), sizeof(Consumo))) {
+      if(c.idMatricula != numeroMatricula) {
+        consumos[cont] = c;
+        cont++;
+      }
+    }
+    archivoConsumosLectura.close();
+
+    // Guarda los consumos actualizados
+    ofstream archivoConsumosEscritura("consumos.txt", ios::out | ios::binary);
+    if(archivoConsumosEscritura.fail()) {
+      cout << ROJO << "Se encontro un error en el archivo costo.txt." << endl;
+      system("pause");
+      exit(0); 
+    }
+    for(int i = 0; i < cantidadConsumos; i++) {
+      archivoConsumosEscritura.write(reinterpret_cast<char *>(&consumos[i]), sizeof(Consumo));
+    }
+    archivoConsumosEscritura.close();
   		
   	cout << VERDE << "Estudiante dado de baja exitosamente" << DEFECTO << endl;
   } else {
