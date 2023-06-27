@@ -13,7 +13,7 @@ void facturacion();
 void consultas();
 void consultaListarCarta();
 void consultaMenu();
-// void consultaMenuPorEstudiante();
+void consultaMenuPorEstudiante();
 
 void gestionAcademica();
 void matricula();
@@ -468,7 +468,7 @@ void consultas() {
       switch(opcion) {
         case 1: consultaListarCarta(); break;
         case 2: consultaMenu(); break;
-        case 3: break;
+        case 3: consultaMenuPorEstudiante(); break;
         case 4: break;
       }
     }
@@ -623,6 +623,34 @@ void consultaMenu() {
   }
 
   cout << endl << ROJO << "[SALIR] " << DEFECTO;; system("pause");
+}
+
+void consultaMenuPorEstudiante() {
+	Consumo c;
+	//Abrir archivos binarios
+	ifstream archivoc("consumos.txt", ios::in | ios::binary);
+	if(archivoc.fail()){
+		cout << "Error al abrir el archivo consumos.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+	system("cls");
+	cout << AZUL << "MENU POR ESTUDIANTES" << endl;
+	cout << "--------------------------------------------" << DEFECTO << endl;
+	//Recorrer el archivo y mostrar datos
+	archivoc.read(reinterpret_cast<char *>(&c), sizeof(Consumo));
+	while(!archivoc.eof()){
+    //Mostrar reporte
+    cout << "Estudiante " << c.nombreMatricula << endl;
+    cout << "Coste del menu: " << c.costeMenu << endl;
+    cout << "Dia: " << c.dia << endl;
+    cout << "ID de la matricula: " << c.idMatricula << endl;
+    cout << "Numero de menu: " << c.numeroMenu << endl;
+    cout << "-------------------------------------------" << endl;
+    archivoc.read(reinterpret_cast<char *>(&c), sizeof(Consumo)); 
+	}
+	archivoc.close();
+	system("pause");
 }
 
 // GESTION ACADEMICA
