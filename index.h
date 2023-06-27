@@ -16,6 +16,9 @@
 // LIMITE MAX DE DIAS (Lunes-Vieres en un Mes)
 #define DIAS_MAX 22 
 
+// MINIMO DEL COSTO FIJO ($100,000.00)
+#define COSTO_FIJO_MIN 100000
+
 struct Plato {
   char nombre[50];
   char ingredientes[500];

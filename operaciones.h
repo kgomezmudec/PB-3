@@ -127,7 +127,7 @@ void ingresarMenu() {
 
   //Ingresa el coste del menu
   do {
-    cout << "Coste total: " ; cin >> menuEscritura.coste;
+    cout << "Coste total: $" ; cin >> menuEscritura.coste;
     if(menuEscritura.coste < COSTO_MIN_MENU) cout << ROJO << "El coste minimo es $" << COSTO_MIN_MENU << DEFECTO << endl;
   } while(menuEscritura.coste < COSTO_MIN_MENU);
 
@@ -678,6 +678,7 @@ void gestionAcademica() {
   } while(opcion != 7 || entrada != 13);
 }
 
+// TODO: Eliminar los consumos del estudiante que se dio de baja
 void darBajaMatricula() {
 	long numeroMatricula;
   int cantidadMatriculas = 0, indice;
@@ -931,112 +932,94 @@ void registrarAcudiente() {
   system("pause");
 }
 
+// TODO: (ALMOST DONE) Guardar el costo fijo en un archivo
 void calcularMensualidad() {
-  long costo=140000;
-  Matricula matricula , i;
+  static bool primeraVez = true;
+  static float costoFijo;
   long id, facturacion, mensualidad;
-  int contMatricula = 0;
-
-  ifstream archivoLectura("matriculas.txt", ios::in | ios::binary);
-  if(archivoLectura.fail()) {
-    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
-    system("pause");
-    exit(0); 
+  int contMatricula = 0, indice;
+  Matricula i;
+  
+  system("cls");
+  // Si ingresa por primera vez se le pide el coste fijo.
+  if(primeraVez) {
+    do {
+      cout << "Ingrese el coste fijo: $"; cin >> costoFijo;
+      if(costoFijo < COSTO_FIJO_MIN) cout << ROJO << "El costo fijo no debe ser inferior a $" << COSTO_FIJO_MIN << "." << DEFECTO << endl;
+    } while(costoFijo < COSTO_FIJO_MIN); 
+    primeraVez = false;
+    system("cls");
   }
-  archivoLectura.close();
-
 
   // Lee los datos ingresados del usuario
-  system("cls");
   cout << "CALCULAR PAGO MENSUALIDAD DE ESTUDIANTE" << endl;
   cout << "Complete los campos." << endl << endl;
+  cout << "Ingrese el numero de matricula del estudiante: "; cin >> id;
 
-  do {
-    cout << "Numero de la matricula: "; cin >> id;
-    if(id <= 0) cout << ROJO << "El numero debe ser mayor que 0" << DEFECTO << endl;
-    if(existeMatricula(id)==false) cout << ROJO << "La matricula no se ha encontrado" << DEFECTO << endl<<endl;
-  } while(id <= 0 or existeMatricula(id)==false);
-
-  ifstream archivop("matriculas.txt", ios::in | ios::binary);
-  if(archivop.fail()) {
-    cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
+  // Verifica si la matricula no existe
+  if(!existeMatricula(id)) {
+    cout << ROJO << "Matricula no registrada." << DEFECTO << endl;
     system("pause");
-    exit(0); 
+    return;
   }
 
-  archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
-	while(!archivop.eof()){
-    if(matricula.id==id){
-      if(matricula.estado==false){
-        cout<<"El estudiante con la matricula "<<id<<" esta dado de baja"<<endl;
-        system("pause");
-        archivop.close();
-        return;
-      }
-      if(matricula.seCalculoFacturacion==false){
-        cout<<"El estudiante con la matricula "<<id<<" no se le ha calculado la facturacion"<<endl;
-        system("pause");
-        archivop.close();
-        return;
-      }
-    }
-    archivop.read(reinterpret_cast<char *>(&matricula), sizeof(Matricula));
-  }
-  archivop.close();
-
- 
+  // Calcula la cantidad de matriculas. 
   ifstream archivot("matriculas.txt", ios::in | ios::binary);
   if(archivot.fail()) {
     cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
     system("pause");
     exit(0); 
   } 
-
-  // Calcula la cantidad de menus. 
-  archivot.read(reinterpret_cast<char *>(&i), sizeof(Matricula));
-  while(!archivot.eof()) {
-    contMatricula++;
-    archivot.read(reinterpret_cast<char *>(&i), sizeof(Matricula));
-  }
+  while(archivot.read(reinterpret_cast<char *>(&i), sizeof(Matricula))) contMatricula++;
   archivot.close();
 
+  // Llena el arreglo de matriculas.
   ifstream archivoLecturab("matriculas.txt", ios::in | ios::binary);
   if(archivoLecturab.fail()) {
     cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
     system("pause");
     exit(0); 
   } 
-
-  // Llena el arreglo de menus
   Matricula matriculas[contMatricula];
-  for(int i = 0; i < contMatricula; i++){
-    archivoLecturab.read(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
+  for(int k = 0; k < contMatricula; k++){
+    archivoLecturab.read(reinterpret_cast<char *>(&matriculas[k]), sizeof(Matricula));
+    if(matriculas[k].id == id) indice = k;
   }
   archivoLecturab.close();
 
-  for(int i=0; i<contMatricula; i++){
-    if(matriculas[i].id==id){
-      matriculas[i].seCalculoMensualidad=true;
-      matriculas[i].pagoMensualidad=matriculas[i].facturacion+costo;
-      cout<< VERDE <<"Mensualidad calculada exitosamente, el costo de la mensualidad es de : "<< matriculas[i].pagoMensualidad << DEFECTO <<endl;
-      system("pause");
-    }
+  // Verifica si la matricula fue dada de baja (Finaliza funcion)
+  if(!matriculas[indice].estado) {
+    cout << ROJO << "La matricula fue dada de baja." << DEFECTO << endl;
+    system("pause");
+    return;
   }
 
+  // Verifica si la matricula no hizo la facturacion (Finaliza funcion)
+  if(!matriculas[indice].seCalculoFacturacion) {
+    cout << ROJO << "Debe realizar la facturacion." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Si esta activo y tiene la facturacion ok, calculara la mensualidad
+  matriculas[indice].pagoMensualidad = costoFijo + matriculas[indice].facturacion;
+  matriculas[indice].seCalculoMensualidad = true;
+
+  // Guarda en el archivo
   ofstream archivoEscritura("matriculas.txt", ios::out | ios::binary);
-   if(archivoEscritura.fail()) {
+  if(archivoEscritura.fail()) {
     cout << ROJO << "Se encontro un error en el archivo matriculas.txt." << endl;
     system("pause");
     exit(0); 
   } 
-
   for(int i = 0; i < contMatricula; i++) {
     archivoEscritura.write(reinterpret_cast<char *>(&matriculas[i]), sizeof(Matricula));
   }
   archivoEscritura.close();
-  system("pause");
-  return;
   
+  cout << "ESTUDIANTE: " << matriculas[indice].nombre << endl;
+  cout << "Costo de la mensualidad: $" << matriculas[indice].pagoMensualidad << endl;
+  cout << ROJO << "[SALIR] " << DEFECTO; system("pause");  
 }
 
 bool existeMatricula(long id) {
