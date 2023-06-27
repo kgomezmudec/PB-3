@@ -26,7 +26,6 @@ void consultasAcademica();
 int validacionAbonanteId(long id, long id_afiliado);
 bool existeAcudienteId(long id);
 bool existeMatricula(long id);
-bool validaFechaIngreso(Fecha fecha1, Fecha fecha2);
 
 // GESTION RESTAURANTE
 
@@ -842,7 +841,6 @@ void darBajaMatricula() {
 	system("pause");
 }
 
-// TODO: Verificar fecha de ingreso
 void matricula() {
   Matricula matricula;
   
@@ -863,7 +861,7 @@ void matricula() {
     if(matricula.nombre[0] == '\0') cout << ROJO << "El nombre del estudiante no puede estar vacio." << DEFECTO << endl;
   } while(matricula.nombre[0] == '\0');
   
-  // Ingresa la fecha de naciemiento: Rango de edad 2-5 años
+  // Ingresa la fecha de naciemiento
   cout << endl << "Fecha de nacimiento (DD/MM/AAAA)" << endl;
   short diasMaximosPorMesA[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   
@@ -885,32 +883,25 @@ void matricula() {
 		if(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]) cout << ROJO << "El dia ingresado debe estar comprendido entre 1 y " << diasMaximosPorMesA[matricula.nacimiento.mes - 1] << "." << DEFECTO << endl;
 	} while(matricula.nacimiento.dia < 1 || matricula.nacimiento.dia > diasMaximosPorMesA[matricula.nacimiento.mes - 1]);
 
-  do {
-    cout << endl << "Fecha de ingreso (DD/MM/AAAA)" << endl;
-    cout << "DD: " ; cin >> matricula.ingreso.dia; 
-    cout << "MM: " ; cin >> matricula.ingreso.mes; 
-    cout << "AAAA: " ; cin >> matricula.ingreso.anio;
-    if(validaFechaIngreso(matricula.nacimiento, matricula.ingreso)) cout << ROJO << "Fecha invalida. Recuerde que el niño debe tener entreo 2 - 5 años" << DEFECTO << endl; 
-  } while(validaFechaIngreso(matricula.nacimiento, matricula.ingreso));
-
-
+  // Ingresa fecha de ingreso. Rango de edad 2-5 años
+  cout << endl << "Fecha de ingreso (DD/MM/AAAA)" << endl;
 	short diasMaximosPorMesB[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 	do {
-		cout << "Año: "; cin >> matricula.ingreso.anio;
-		if(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 2) cout << ROJO << "El estudiante esta ingresando con " << matricula.ingreso.anio - matricula.nacimiento.anio << " años." << DEFECTO << endl;
-	} while(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 2);
+		cout << "AAAA: "; cin >> matricula.ingreso.anio;
+		if(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 3) cout << ROJO << "El rango de edad esta entre poco mas de 2  y menor a 5." << DEFECTO << endl;
+	} while(matricula.ingreso.anio - matricula.nacimiento.anio > 5 || matricula.ingreso.anio - matricula.nacimiento.anio < 3);
 
 	// Verifica si es año biciesto, cambia el dia maximo para febrero.
 	if((matricula.ingreso.anio % 4 == 0 && matricula.ingreso.anio % 100 != 0) || (matricula.ingreso.anio % 400 == 0)) diasMaximosPorMesB[1] = 29;
 
 	do {
-		cout << "Mes: "; cin >> matricula.ingreso.mes;
+		cout << "MM: "; cin >> matricula.ingreso.mes;
 		if(matricula.ingreso.mes < 1 || matricula.ingreso.mes > 12) cout << ROJO << "El mes ingresado debe estar comprendido entre 1 y 12." << DEFECTO << endl;
 	} while(matricula.ingreso.mes < 1 || matricula.ingreso.mes > 12);
 
 	do {
-		cout << "Dia: "; cin >> matricula.ingreso.dia;
+		cout << "DD: "; cin >> matricula.ingreso.dia;
 		if(matricula.ingreso.dia < 1 || matricula.ingreso.dia > diasMaximosPorMesB[matricula.ingreso.mes - 1]) cout << ROJO << "El dia ingresado debe estar comprendido entre 1 y " << diasMaximosPorMesB[matricula.ingreso.mes - 1] << "." << DEFECTO << endl;
 	} while(matricula.ingreso.dia < 1 || matricula.ingreso.dia > diasMaximosPorMesB[matricula.ingreso.mes - 1]);
 
@@ -1146,6 +1137,7 @@ void calcularMensualidad() {
   cout << ROJO << "[SALIR] " << DEFECTO; system("pause");  
 }
 
+// FIXME:
 void pagarMensualidad() {
   Matricula i;
   Acudiente acudiente;
@@ -1327,7 +1319,7 @@ void pagarMensualidad() {
   }
   archivoConsumosEscritura.close();
 
-  cout << endl << VERDE << "abonante ingresado exitosamente..." << DEFECTO << endl;
+  cout << endl << VERDE << "Pago hecho exitosamente..." << DEFECTO << endl;
   system("pause");
 }
 
@@ -1441,8 +1433,4 @@ bool existeMatricula(long id) {
 	}	
 	archivo.close();
 	return false;
-}
-
-bool validaFechaIngreso(Fecha fecha1, Fecha fecha2) {
-  return 0;
 }
