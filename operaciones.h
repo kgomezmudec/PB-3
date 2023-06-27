@@ -309,18 +309,20 @@ void asignarMenuPorEstudiante() {
   while(!archivoMenus.eof()) {
     menuApto = true;
     // Recorre las alergias
-    for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
-      // Recorre los del menu determinado
-      for(int k = 0; k < menu.cantidadPlatos; k++) {
-        // Compara la i alergia con k plato del menu actual.
-        if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
-          menuApto = false;
-          break;  
-        } 
+    if(menu.registroPlatos) {
+      for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
+        // Recorre los del menu determinado
+        for(int k = 0; k < menu.cantidadPlatos; k++) {
+          // Compara la i alergia con k plato del menu actual.
+          if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
+            menuApto = false;
+            break;  
+          } 
+        }
+        if(!menuApto) break;
       }
-      if(!menuApto) break;
+      if(menuApto) cantidadMenusFiltrados++;
     }
-    if(menuApto) cantidadMenusFiltrados++;
     archivoMenus.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   }
   archivoMenus.close();
@@ -343,21 +345,23 @@ void asignarMenuPorEstudiante() {
   archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   while(!archivoMenuLectura.eof()) {
     menuApto = true;
-    // Recorre las alergias
-    for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
-      // Recorre los del menu determinado
-      for(int k = 0; k < menu.cantidadPlatos; k++) {
-        // Compara la i alergia con k plato del menu actual.
-        if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
-          menuApto = false;
-          break;  
-        } 
+    if(menu.registroPlatos) {
+      // Recorre las alergias
+      for(int i = 0; i < matriculas[indice].numeroAlergias; i++) {
+        // Recorre los del menu determinado
+        for(int k = 0; k < menu.cantidadPlatos; k++) {
+          // Compara la i alergia con k plato del menu actual.
+          if(strstr(menu.platos[k].ingredientes, matriculas[indice].alergias[i].nombre) != NULL) {
+            menuApto = false;
+            break;  
+          } 
+        }
+        if(!menuApto) break;
       }
-      if(!menuApto) break;
-    }
-    if(menuApto) {
-      menusAptos[cont] = menu;
-      cont++;
+      if(menuApto) {
+        menusAptos[cont] = menu;
+        cont++;
+      }
     }
     archivoMenuLectura.read(reinterpret_cast<char *>(&menu), sizeof(Menu));
   }
