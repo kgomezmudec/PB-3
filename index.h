@@ -58,7 +58,7 @@ struct Matricula {
   bool seCalculoMensualidad = false;
   bool sePagoMensualidad = false; 
   float facturacion;
-  float pagoMensualidad;
+  float pagoMensualidad = 0;
   int dias = 0;
   int numeroAlergias;
   Ingrediente alergias[100];

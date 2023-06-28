@@ -856,7 +856,7 @@ void matricula() {
   
   // Lee los datos ingresados del usuario
   system("cls");
-  cout << "MATRICULAR ESTUDIANTE" << endl << "El rango de edad debe ser entre 2 - 5  años" << endl << "Complete los campos." << endl << endl;
+  cout << "MATRICULAR ESTUDIANTE" << endl << "El rango de edad debe ser entre 2 - 5." << endl << "Complete los campos." << endl << endl;
 
   do {
     cout << "Numero de la matricula: "; cin >> matricula.id;
@@ -1495,9 +1495,8 @@ void listaConBajas() {
   system("pause");
 }
 
-// FIXME: Revisar
 void reporteEstadoFinanciero() {
-	/* Matricula m;
+	Matricula m;
 	Acudiente a;
 	bool bandera;
 	
@@ -1510,7 +1509,6 @@ void reporteEstadoFinanciero() {
 	}
 	system("cls");
 	cout << "REPORTE DE ESTADO FINANCIERO DE ESTUDIANTES" << endl;
-	cout << "-----------------------------------------------" << endl;
 	//Recorrer el archivo y mostrar datos
 	archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
 	while(!archivom.eof()){
@@ -1519,6 +1517,8 @@ void reporteEstadoFinanciero() {
 			//Mostrar reporte
 			cout << "Numero de matricula: " << m.id << endl;
 			cout << "Nombre del estudiante: " << m.nombre << endl;
+      cout << "Valor de la mensualidad: " << m.pagoMensualidad << endl;
+      cout << "Estado de pago: " << (m.sePagoMensualidad ? "Paz y salvo" : "Moroso") << endl;
 			
 			ifstream archivoa("acudientes.txt" , ios::in | ios::binary);
 			if(archivoa.fail()){
@@ -1528,24 +1528,20 @@ void reporteEstadoFinanciero() {
 			}
 			archivoa.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));
 			while(!archivoa.eof()){
-				if(m.id == a.id){
-					cout << "Valor de la mensualidad: " << a.pagoMensualidad << endl;
+				if(m.id == a.id_afilado && a.abonante){
 					cout << "Responsable de pago: " << a.nombre << endl;
-					cout << "Estado de pago: " << (m.estado ? "Paz y salvo" : "Moroso") << endl;
 					bandera = true;	
 				}
-				archivoa.read(reinterpret_cast<char *>(&a), sizeof(Abonante));	
+				archivoa.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));	
 			}
 			archivoa.close();
-			if(bandera == false){
-				cout << ROJO << "Abonante aun no registrado." << DEFECTO << endl;
-				cout << "-------------------------------------------------------" << endl;
-			}
+      if(!bandera) cout << "No cuenta con responsables de pago" << endl;
 		}
+    cout << "----------------------------------------------------" << endl;
 		archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula));	
 	}
 	archivom.close();
-	system("pause"); */
+	system("pause"); 
 }
 
 void consultaPorEstudiante() {
