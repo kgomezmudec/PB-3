@@ -918,7 +918,7 @@ void matricula() {
   // Registro de alergias
   cout << endl;
   do {
-    cout << "A cuantos ingredientes es alergico el niño?: "; cin >> matricula.numeroAlergias;
+    cout << "A cuantos ingredientes es alergico?: "; cin >> matricula.numeroAlergias;
     if(matricula.numeroAlergias > 100 || matricula.numeroAlergias < 0) cout << ROJO << "Fuera de rango" << DEFECTO << endl;
   } while(matricula.numeroAlergias > 100 || matricula.numeroAlergias < 0);
   
@@ -1517,7 +1517,7 @@ void reporteEstadoFinanciero() {
 			//Mostrar reporte
 			cout << "Numero de matricula: " << m.id << endl;
 			cout << "Nombre del estudiante: " << m.nombre << endl;
-      cout << "Valor de la mensualidad: " << m.pagoMensualidad << endl;
+      cout << "Valor de la mensualidad: $" << m.pagoMensualidad << endl;
       cout << "Estado de pago: " << (m.sePagoMensualidad ? "Paz y salvo" : "Moroso") << endl;
 			
 			ifstream archivoa("acudientes.txt" , ios::in | ios::binary);
@@ -1552,6 +1552,7 @@ void consultaPorEstudiante() {
   system("cls");
   cout << "CONSULTA POR ESTUDIANTE" << endl;
   cout << "Digite el numero de matricula: "; cin >> id;
+  cout << endl;
 
   // Verifica si la matricula no existe (Finaliza funcion)
   if(!existeMatricula(id)) {
@@ -1591,7 +1592,7 @@ void consultaPorEstudiante() {
         archivoAcudiente.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));	
 			}
 			archivoAcudiente.close();
-      cout << "Valor de mensualidad: " << m.pagoMensualidad << endl; 
+      cout << "Valor de mensualidad: $" << m.pagoMensualidad << endl; 
 			cout << "Estado de pago: " << (m.sePagoMensualidad ? "Paz y salvo.": "Moroso.") << endl;
       break;
     }
