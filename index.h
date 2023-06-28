@@ -1,3 +1,8 @@
+/**
+ * Kevin Andres Gomez Meza - 0222220034
+ * Boris David Bello del Rio - 0222220046
+ * Juan Camilo Corrales Fonseca - 0222220044 
+ */
 #include <string>
 
 // Codigo de colores
