@@ -1,3 +1,11 @@
+/**
+ * Kevin Andres Gomez Meza - 0222220034
+ * Boris David Bello del Rio - 0222220046
+ * Juan Camilo Corrales Fonseca - 0222220044 
+ * 
+ * 
+ */
+
 #include "index.h"
 #include <iostream>
 #include <fstream>
@@ -24,6 +32,8 @@ void pagarMensualidad();
 void consultasAcademica();
 void listaActivos();
 void listaConBajas();
+void reporteEstadoFinanciero();
+void consultaPorEstudiante();
 
 int validacionAbonanteId(long id, long id_afiliado);
 bool existeAcudienteId(long id);
@@ -1403,8 +1413,8 @@ void consultasAcademica() {
       switch(opcion) {
         case 1: listaActivos(); break;
         case 2: listaConBajas(); break;
-        case 3: break;
-        case 4: break;
+        case 3: reporteEstadoFinanciero(); break;
+        case 4: consultaPorEstudiante(); break;
         case 5: break;
       }
     }
@@ -1485,6 +1495,115 @@ void listaConBajas() {
 	}
   archivop.close();
   system("pause");
+}
+
+// FIXME: Revisar
+void reporteEstadoFinanciero() {
+	/* Matricula m;
+	Acudiente a;
+	bool bandera;
+	
+  // Abrir archivos binarios
+	ifstream archivom("matriculas.txt", ios::in | ios::binary);
+	if(archivom.fail()){
+		cout << "Error al abrir el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+	system("cls");
+	cout << "REPORTE DE ESTADO FINANCIERO DE ESTUDIANTES" << endl;
+	cout << "-----------------------------------------------" << endl;
+	//Recorrer el archivo y mostrar datos
+	archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+	while(!archivom.eof()){
+		if(m.estado){
+			bandera = false;
+			//Mostrar reporte
+			cout << "Numero de matricula: " << m.id << endl;
+			cout << "Nombre del estudiante: " << m.nombre << endl;
+			
+			ifstream archivoa("acudientes.txt" , ios::in | ios::binary);
+			if(archivoa.fail()){
+				cout << "Error al abrir el archivo acudientes.txt." << endl;
+				system("pause");
+				exit(0);
+			}
+			archivoa.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));
+			while(!archivoa.eof()){
+				if(m.id == a.id){
+					cout << "Valor de la mensualidad: " << a.pagoMensualidad << endl;
+					cout << "Responsable de pago: " << a.nombre << endl;
+					cout << "Estado de pago: " << (m.estado ? "Paz y salvo" : "Moroso") << endl;
+					bandera = true;	
+				}
+				archivoa.read(reinterpret_cast<char *>(&a), sizeof(Abonante));	
+			}
+			archivoa.close();
+			if(bandera == false){
+				cout << ROJO << "Abonante aun no registrado." << DEFECTO << endl;
+				cout << "-------------------------------------------------------" << endl;
+			}
+		}
+		archivom.read(reinterpret_cast<char *>(&m), sizeof(Matricula));	
+	}
+	archivom.close();
+	system("pause"); */
+}
+
+void consultaPorEstudiante() {
+	Matricula m;
+  Acudiente a;
+  long id;
+
+  system("cls");
+  cout << "CONSULTA POR ESTUDIANTE" << endl;
+  cout << "Digite el numero de matricula: "; cin >> id;
+
+  // Verifica si la matricula no existe (Finaliza funcion)
+  if(!existeMatricula(id)) {
+    cout << ROJO << "La matricula no esta registrada." << DEFECTO << endl;
+    system("pause");
+    return;
+  }
+
+  // Halla la matricula
+  ifstream archivoMatricula("matriculas.txt", ios::in | ios::binary);
+  if(archivoMatricula.fail()){
+		cout << "Error al abrir el archivo matriculas.txt." << endl;
+		system("pause");
+		exit(0);
+	}
+  archivoMatricula.read(reinterpret_cast<char *>(&m), sizeof(Matricula));
+  while(!archivoMatricula.eof()) {
+    // Imprime los datos de la matricula
+    if(m.id == id) {
+      cout << "Numero de matricula: " << m.id << endl;
+			cout << "Nombre del estudiante: " << m.nombre << endl;
+			cout << "Fecha de ingreso: " << m.ingreso.dia << "/" << m.ingreso.mes << "/" << m.ingreso.anio << endl;
+			cout << "Edad: " << m.ingreso.anio - m.nacimiento.anio << endl;
+      for(int i = 0 ; i < m.numeroAlergias; i++) {
+				cout << "Alergia " << i + 1 << ": "<< m.alergias[i].nombre << endl;
+			}
+
+      ifstream archivoAcudiente("acudientes.txt" , ios::in | ios::binary);
+			if(archivoAcudiente.fail()){
+				cout << "Error al abrir el archivo acudientes.txt." << endl;
+				system("pause");
+				exit(0);
+			}
+			archivoAcudiente.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));
+			while(!archivoAcudiente.eof()) {
+        if(a.id_afilado == id) cout << "Nombre del acudiente: " << a.nombre << endl;
+        archivoAcudiente.read(reinterpret_cast<char *>(&a), sizeof(Acudiente));	
+			}
+			archivoAcudiente.close();
+      cout << "Valor de mensualidad: " << m.pagoMensualidad << endl; 
+			cout << "Estado de pago: " << (m.sePagoMensualidad ? "Paz y salvo.": "Moroso.") << endl;
+      break;
+    }
+    archivoMatricula.read(reinterpret_cast<char *>(&m), sizeof(Matricula));	
+  }
+	system("pause");
 }
 
 bool existeAcudienteId(long id) {
